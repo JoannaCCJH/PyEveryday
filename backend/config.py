@@ -1,5 +1,12 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
+
+
+# Resolve .env relative to this file so the load works regardless of the
+# process's current working directory.
+ENV_FILE = Path(__file__).resolve().parent / ".env"
 
 
 class Settings(BaseSettings):
@@ -16,7 +23,7 @@ class Settings(BaseSettings):
 
     # Pydantic Settings configuration
     model_config = SettingsConfigDict(
-        env_file="backend/.env",
+        env_file=str(ENV_FILE),
         extra="ignore"
     )
 
