@@ -15,13 +15,38 @@ For ``organize_files_by_date`` we mock ``os.stat`` to return a deterministic
 
 from __future__ import annotations
 
+import datetime as _dt
 import os
-from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
 
 from scripts.automation import file_organizer
+
+
+def _stat_with_ctime(ctime: float):
+    """Return an ``os.stat`` replacement that keeps the real ``st_mode`` etc.
+
+    The SUT calls ``os.path.isfile`` (which itself calls ``os.stat`` and reads
+    ``st_mode``) *before* it reads ``st_ctime``.  If we return a bare
+    ``SimpleNamespace(st_ctime=...)``, ``os.path.isfile`` blows up.  Instead we
+    delegate to the real ``os.stat`` and only override ``st_ctime`` via a
+    lightweight proxy.
+    """
+    real_stat = os.stat
+
+    class _StatProxy:
+        def __init__(self, real):
+            self._real = real
+            self.st_ctime = ctime
+
+        def __getattr__(self, name):
+            return getattr(self._real, name)
+
+    def _fake(path, *a, **kw):
+        return _StatProxy(real_stat(path, *a, **kw))
+
+    return _fake
 
 
 class TestOrganizeByExtension:
@@ -61,12 +86,10 @@ class TestOrganizeByDate:
         (tmp_path / "doc.txt").write_text("1")
         (tmp_path / "sub").mkdir()  # ignored
 
-        # Pin creation time to 2026-04-19 so the resulting bucket is "2026-04".
-        fake = SimpleNamespace(
-            st_ctime=__import__("datetime").datetime(2026, 4, 19, 12, 0, 0).timestamp()
-        )
+        ctime = _dt.datetime(2026, 4, 19, 12, 0, 0).timestamp()
 
-        with patch("scripts.automation.file_organizer.os.stat", return_value=fake):
+        with patch("scripts.automation.file_organizer.os.stat",
+                   side_effect=_stat_with_ctime(ctime)):
             file_organizer.organize_files_by_date(str(tmp_path))
 
         bucket = tmp_path / "2026-04"
@@ -75,9 +98,9 @@ class TestOrganizeByDate:
 
     def test_move_failure_is_logged(self, tmp_path, capsys):
         (tmp_path / "doc.txt").write_text("1")
-        fake = SimpleNamespace(st_ctime=0.0)
 
-        with patch("scripts.automation.file_organizer.os.stat", return_value=fake), \
+        with patch("scripts.automation.file_organizer.os.stat",
+                   side_effect=_stat_with_ctime(0.0)), \
              patch("scripts.automation.file_organizer.shutil.move",
                    side_effect=OSError("disk full")):
             file_organizer.organize_files_by_date(str(tmp_path))
