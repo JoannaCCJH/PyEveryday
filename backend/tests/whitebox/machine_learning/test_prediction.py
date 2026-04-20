@@ -84,10 +84,12 @@ class TestParseSales:
         df = predictor.parse_sales(text)
         assert isinstance(df, pd.DataFrame)
 
-    def test_blank_input_returns_empty(self, predictor, capsys):
-        df = predictor.parse_sales("\n   \n")
+    def test_blank_input_returns_empty(self, predictor, caplog):
+        import logging as _logging
+        with caplog.at_level(_logging.WARNING):
+            df = predictor.parse_sales("\n   \n")
         assert df.empty
-        assert "No sales data found" in capsys.readouterr().out
+        assert any("No sales data found" in rec.message for rec in caplog.records)
 
 
 # ----------------------------- train --------------------------
