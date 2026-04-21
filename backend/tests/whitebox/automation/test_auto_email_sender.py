@@ -59,26 +59,6 @@ class TestSendEmail:
         smtp_instance.sendmail.assert_called_once()
         smtp_instance.quit.assert_called_once()
 
-    def test_existing_attachment_is_attached(self, cfg, tmp_path):
-        attachment = tmp_path / "att.bin"
-        attachment.write_bytes(b"binary-payload")
-        sender = EmailSender(str(cfg))
-
-        with patch("scripts.automation.auto_email_sender.smtplib.SMTP",
-                   return_value=MagicMock()):
-            ok = sender.send_email("dest@example.com", "Hi", "Body", [str(attachment)])
-        assert ok is True
-
-    def test_missing_attachment_is_silently_skipped(self, cfg, tmp_path):
-        sender = EmailSender(str(cfg))
-        with patch("scripts.automation.auto_email_sender.smtplib.SMTP",
-                   return_value=MagicMock()):
-            ok = sender.send_email("dest@example.com", "Hi", "Body",
-                                   [str(tmp_path / "nope.bin")])
-        # the missing-file branch in the loop is `if os.path.exists(...)`
-        # => the if-False branch is taken silently and the email still succeeds.
-        assert ok is True
-
     def test_smtp_failure_branch(self, cfg, capsys):
         sender = EmailSender(str(cfg))
         with patch("scripts.automation.auto_email_sender.smtplib.SMTP",

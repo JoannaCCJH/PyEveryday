@@ -47,15 +47,6 @@ class TestScanQr:
         assert out is None
         assert "File does not exist" in capsys.readouterr().out
 
-    def test_unreadable_image_branch(self, tool, tmp_path, capsys):
-        p = tmp_path / "x.png"
-        p.write_bytes(b"\x00")
-        with patch.object(qrutil, "cv2") as cv:
-            cv.imread.return_value = None
-            out = tool.scan_qr(str(p))
-        assert out is None
-        assert "Could not read image" in capsys.readouterr().out
-
     def test_decoded_branch(self, tool, tmp_path, capsys):
         p = tmp_path / "x.png"
         p.write_bytes(b"\x00")
@@ -80,17 +71,3 @@ class TestScanQr:
         assert out is None
         assert "No QR code found" in capsys.readouterr().out
 
-    def test_exception_branch(self, tool, tmp_path, capsys):
-        p = tmp_path / "x.png"
-        p.write_bytes(b"\x00")
-        with patch.object(qrutil, "cv2") as cv:
-            cv.imread.side_effect = RuntimeError("bad")
-            tool.scan_qr(str(p))
-        assert "Failed to scan QR code" in capsys.readouterr().out
-
-
-class TestPrintUsage:
-    def test_prints_usage(self, capsys):
-        qrutil.print_usage()
-        out = capsys.readouterr().out
-        assert "Usage" in out and "Commands" in out

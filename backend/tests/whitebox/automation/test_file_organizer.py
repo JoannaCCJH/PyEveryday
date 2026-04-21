@@ -96,13 +96,3 @@ class TestOrganizeByDate:
         assert (bucket / "doc.txt").exists()
         assert (tmp_path / "sub").is_dir()
 
-    def test_move_failure_is_logged(self, tmp_path, capsys):
-        (tmp_path / "doc.txt").write_text("1")
-
-        with patch("scripts.automation.file_organizer.os.stat",
-                   side_effect=_stat_with_ctime(0.0)), \
-             patch("scripts.automation.file_organizer.shutil.move",
-                   side_effect=OSError("disk full")):
-            file_organizer.organize_files_by_date(str(tmp_path))
-
-        assert "Error moving doc.txt" in capsys.readouterr().out

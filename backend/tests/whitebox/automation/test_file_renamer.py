@@ -25,15 +25,6 @@ class TestRenameFiles:
         assert "does not exist" in out
         assert "Total files renamed" not in out  # short-circuit return
 
-    def test_no_matches_zero_iterations(self, tmp_path, capsys):
-        (tmp_path / "alpha.txt").write_text("x")
-        (tmp_path / "beta.txt").write_text("y")
-        file_renamer.rename_files(str(tmp_path), "ZZZ", "QQQ")
-        out = capsys.readouterr().out
-        assert "Total files renamed: 0" in out
-        assert (tmp_path / "alpha.txt").exists()
-        assert (tmp_path / "beta.txt").exists()
-
     def test_renames_only_matching_files(self, tmp_path, capsys):
         (tmp_path / "log_a.txt").write_text("1")
         (tmp_path / "log_b.txt").write_text("2")

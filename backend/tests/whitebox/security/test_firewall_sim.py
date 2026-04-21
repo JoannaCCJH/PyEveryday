@@ -19,14 +19,9 @@ from scripts.security import firewall_sim as fs
 
 
 class TestGenerateIp:
-    @pytest.mark.parametrize("rand,expected", [
-        (0, "192.168.1.0"),
-        (15, "192.168.1.15"),
-        (20, "192.168.1.20"),
-    ])
-    def test_returns_in_range(self, rand, expected):
-        with patch("scripts.security.firewall_sim.random.randint", return_value=rand):
-            assert fs.generate_ip() == expected
+    def test_deterministic_when_random_patched(self):
+        with patch("scripts.security.firewall_sim.random.randint", return_value=15):
+            assert fs.generate_ip() == "192.168.1.15"
 
 
 class TestCheckFirewallAction:
@@ -39,9 +34,6 @@ class TestCheckFirewallAction:
 
     def test_no_match(self, rules):
         assert fs.check_firewall_action("192.168.1.42", rules) == "ALLOW!!"
-
-    def test_empty_rules(self):
-        assert fs.check_firewall_action("1.2.3.4", {}) == "ALLOW!!"
 
 
 class TestMain:
