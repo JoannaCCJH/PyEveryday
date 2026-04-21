@@ -1,8 +1,7 @@
 """
 Black-box tests for scripts.security.password_checker.
 
-Derived from SPEC.md Â§password_checker (no peeking at implementation).
-Applies EP / BA / EG per proposal Â§2.2. Each test is labeled with technique.
+Applies EP / BA / EG. Each test is labeled with its technique and goal.
 """
 import pytest
 
@@ -86,7 +85,7 @@ class TestCheckCommonPatternsEP:
 # =========================================================================
 
 class TestLengthBoundariesBA:
-    """Boundary analysis around length thresholds 8, 12, 16 (per SPEC)."""
+    """Boundary analysis around length thresholds 8, 12, 16."""
 
     @pytest.mark.parametrize("length, expect_8, expect_12", [
         (7, False, False),   # BA: length=7 (just-below 8-plus)
@@ -110,12 +109,12 @@ class TestEntropyBoundariesBA:
         assert checker.calculate_entropy("a") > 0
 
     def test_empty_string_entropy_is_zero(self, checker):
-        # BA: charset size = 0 corner -> entropy 0 per SPEC.
+        # BA: charset size = 0 corner -> entropy 0.
         assert checker.calculate_entropy("") == 0
 
 
 class TestStrengthScoreBA:
-    """Boundary analysis on the strength_score cap at 12 (per SPEC)."""
+    """Boundary analysis on the strength_score cap at 12."""
 
     def test_strength_score_is_capped_at_12(self, checker):
         # BA: for an exceptionally strong password, score must not exceed 12.
@@ -172,10 +171,10 @@ class TestErrorGuessing:
 
     def test_extremely_long_password_does_not_crash(self, checker):
         # EG / FAULT-HUNTING: very long passwords push entropy so high that
-        # estimate_crack_time's `2**entropy` overflows Python floats. Per SPEC
-        # the contract is "returns full dict"; a crash violates it. This test
-        # is intentionally designed to FAIL until the overflow is handled.
-        # (See FINDINGS.md FAULT-002.)
+        # estimate_crack_time's `2**entropy` overflows Python floats.
+        # Intended contract: returns full dict; a crash violates it.
+        # Designed to FAIL until the overflow is handled. See FINDINGS.md
+        # FAULT-002.
         pwd = "Aa1!" * 500  # 2000 chars
         result = checker.analyze_password(pwd)
         assert result["length"] == 2000
@@ -191,7 +190,7 @@ class TestErrorGuessing:
         assert "admin" in result["dictionary_words"]
 
     def test_estimate_crack_time_returns_four_scenarios(self, checker):
-        # EG: contract - exactly 4 documented attack scenarios per SPEC.
+        # EG: contract - exactly 4 documented attack scenarios.
         times = checker.estimate_crack_time("Aa1!Aa1!")
         assert set(times.keys()) == {
             "online_throttled", "online_unthrottled", "offline_slow", "offline_fast"

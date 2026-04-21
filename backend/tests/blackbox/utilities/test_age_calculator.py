@@ -1,8 +1,7 @@
 """
 Black-box tests for scripts.utilities.age_calculator.
 
-Derived from SPEC.md Â§age_calculator (no peeking at implementation).
-Applies EP / BA / EG per proposal Â§2.2.
+Applies EP / BA / EG. Each test is labeled with its technique and goal.
 """
 import datetime
 
@@ -39,7 +38,7 @@ class TestParseDateEP:
         assert ac.parse_date(s) == expected
 
     def test_unparseable_string_raises(self, ac):
-        # EP: invalid class -> ValueError per SPEC.
+        # EP: invalid class -> ValueError.
         with pytest.raises(ValueError):
             ac.parse_date("not-a-date-at-all")
 
@@ -57,7 +56,7 @@ class TestCalculateAgeEP:
         assert result["days"] == 0
 
     def test_future_birth_date_raises(self, ac):
-        # EP: invalid class -> ValueError per SPEC.
+        # EP: invalid class -> ValueError.
         with pytest.raises(ValueError):
             ac.calculate_age("2099-01-01", "2020-01-01")
 
@@ -148,14 +147,14 @@ class TestZodiacBoundariesBA:
 class TestErrorGuessing:
     def test_leap_day_birth_in_non_leap_current_year_does_not_crash(self, ac):
         # EG / FAULT-HUNTING: Feb 29 birthday + non-leap current year.
-        # SPEC says calculate_age returns a full dict for any valid birth+
-        # current pair. Expected to FAIL until leap-day edge is handled.
+        # Intended contract: calculate_age returns a full dict for any valid
+        # birth+current pair. Expected to FAIL until leap-day edge is handled.
         # See FINDINGS.md FAULT-004.
         result = ac.calculate_age("2000-02-29", "2021-03-01")
         assert result["years"] == 21
 
     def test_ambiguous_date_dd_mm_wins_over_mm_dd(self, ac):
-        # EG: SPEC notes the DD/MM/YYYY format is tried before MM/DD/YYYY, so
+        # EG: the DD/MM/YYYY format is tried before MM/DD/YYYY, so
         # "03/04/2020" resolves to 3 April 2020, not 4 March 2020. This test
         # documents the first-match contract.
         assert ac.parse_date("03/04/2020") == datetime.date(2020, 4, 3)
@@ -166,9 +165,9 @@ class TestErrorGuessing:
         assert "animal" in z and "element" in z
 
     def test_calculate_zodiac_never_returns_unknown_for_valid_date(self, ac):
-        # EG / FAULT-HUNTING: SPEC Â§Gaps #6 flags that the zodiac function
-        # has an "Unknown" fallback that should never fire for a valid date.
-        # Iterate every day of a year and ensure no "Unknown" surfaces.
+        # EG / FAULT-HUNTING: the zodiac function has an "Unknown" fallback
+        # that should never fire for a valid date. Iterate every day of a
+        # year and ensure no "Unknown" surfaces.
         start = datetime.date(2000, 1, 1)
         for offset in range(366):  # 2000 is a leap year
             d = start + datetime.timedelta(days=offset)
@@ -186,7 +185,7 @@ class TestErrorGuessing:
             ac.parse_date("   ")
 
     def test_life_events_returns_eight_milestones(self, ac):
-        # EG: contract - 8 milestone ages per SPEC.
+        # EG: contract - 8 milestone ages.
         events = ac.calculate_life_events("2000-01-01")
         assert len(events) == 8
         ages = [e["age"] for e in events]

@@ -1,8 +1,7 @@
 """
 Black-box tests for scripts.data_tools.data_converter.
 
-Derived from SPEC.md Â§data_converter (no peeking at implementation).
-Applies EP / BA / EG per proposal Â§2.2.
+Applies EP / BA / EG. Each test is labeled with its technique and goal.
 
 Uses tmp_path for real file IO (no mocks - pandas-on-disk is part of
 the contract under test).
@@ -63,7 +62,7 @@ class TestAutoReadEP:
         assert dc.auto_read(str(f)) is None
 
     def test_auto_read_case_insensitive_extension(self, dc, tmp_path):
-        # EP: SPEC says dispatch is case-insensitive.
+        # EP: extension dispatch is case-insensitive.
         f = tmp_path / "x.JSON"
         f.write_text(json.dumps({"k": "v"}))
         assert dc.auto_read(str(f)) == {"k": "v"}
@@ -126,8 +125,8 @@ class TestBoundaries:
         f = tmp_path / "empty.json"
         assert dc.write_json([], str(f)) is True
         data = dc.read_json(str(f))
-        # Per SPEC, list-of-dicts returns a DataFrame; empty list may land as
-        # either an empty list or an empty DataFrame.
+        # List-of-dicts normally returns a DataFrame; empty list may land
+        # as either an empty list or an empty DataFrame.
         if isinstance(data, pd.DataFrame):
             assert data.empty
         else:
@@ -165,7 +164,7 @@ class TestErrorGuessing:
         assert dc.unflatten_json(dc.flatten_json(nested)) == nested
 
     def test_flatten_list_becomes_json_string(self, dc):
-        # EG / contract: SPEC warns flatten encodes lists as json strings.
+        # EG / contract: flatten encodes lists as json strings (lossy).
         result = dc.flatten_json({"k": [1, 2, 3]})
         assert result == {"k": "[1, 2, 3]"}
 
@@ -185,7 +184,7 @@ class TestErrorGuessing:
         assert dc.convert_file(str(src), str(dst)) is False
 
     def test_convert_file_unknown_output_extension_returns_false(self, dc, tmp_path):
-        # EG: unknown output extension -> False per SPEC.
+        # EG: unknown output extension -> False.
         src = tmp_path / "s.json"
         src.write_text(json.dumps(SAMPLE_RECORDS))
         dst = tmp_path / "out.foo"
@@ -201,9 +200,9 @@ class TestErrorGuessing:
         assert result["equal"] is True
 
     def test_compare_different_row_order_not_equal(self, dc, tmp_path):
-        # EG / FAULT-HUNTING: SPEC documents compare_data as ORDER SENSITIVE.
-        # Two files containing the same records in different order must
-        # currently report "not equal". This documents contract behavior.
+        # EG / FAULT-HUNTING: compare_data is ORDER SENSITIVE. Two files
+        # containing the same records in different order currently report
+        # "not equal". This documents the contract.
         a = tmp_path / "a.json"
         b = tmp_path / "b.json"
         a.write_text(json.dumps(SAMPLE_RECORDS))

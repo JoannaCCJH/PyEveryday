@@ -1,8 +1,7 @@
 """
 Black-box tests for scripts.utilities.unit_converter.
 
-Derived from SPEC.md Â§unit_converter (no peeking at implementation).
-Applies EP / BA / EG per proposal Â§2.2. Each test is labeled with technique.
+Applies EP / BA / EG. Each test is labeled with its technique and goal.
 """
 import math
 
@@ -35,7 +34,7 @@ class TestConvertStandardEP:
         assert uc.convert_standard(1000, "m", "km", "length") == pytest.approx(1.0)
 
     def test_unknown_category_returns_none(self, uc):
-        # EP: unknown category -> None per SPEC.
+        # EP: unknown category -> None.
         assert uc.convert_standard(1, "m", "km", "fake_category") is None
 
     def test_unknown_from_unit_returns_none(self, uc):
@@ -82,7 +81,7 @@ class TestConvertDispatchEP:
         assert uc.convert(0, "celsius", "kelvin") == pytest.approx(273.15)
 
     def test_cross_category_units_returns_none(self, uc):
-        # EP: kg -> m is invalid class -> None per SPEC.
+        # EP: kg -> m is invalid class -> None.
         assert uc.convert(1, "kg", "m") is None
 
 
@@ -122,14 +121,13 @@ class TestBoundaries:
 
 class TestErrorGuessing:
     def test_case_insensitive_temperature_units(self, uc):
-        # EG: per SPEC, convert_temperature lowercases from_unit / to_unit.
+        # EG: convert_temperature lowercases from_unit / to_unit internally.
         assert uc.convert_temperature(0, "CELSIUS", "FAHRENHEIT") == pytest.approx(32)
 
     def test_calculate_ratio_unknown_unit_should_return_none(self, uc):
-        # EG / FAULT-HUNTING: SPEC Â§Gaps #6 says calculate_ratio uses .get(u, 0)
-        # so an unknown unit silently becomes 0 and returns 0.0 instead of None.
-        # Intended contract: unknown unit -> None.
-        # Designed to FAIL if the suspected fault is present.
+        # EG / FAULT-HUNTING: calculate_ratio uses .get(u, 0) so an unknown
+        # unit silently becomes 0 and returns 0.0 instead of None. Intended
+        # contract: unknown unit -> None. See FINDINGS.md FAULT-003.
         result = uc.calculate_ratio(10, "bogus_unit", 5, "m", "length")
         assert result is None
 
@@ -143,7 +141,7 @@ class TestErrorGuessing:
         assert uc.calculate_ratio(5, "m", 0, "m", "length") is None
 
     def test_list_units_unknown_category_returns_empty_list(self, uc):
-        # EG: unknown category -> empty list (not None) per SPEC.
+        # EG: unknown category -> empty list (not None).
         assert uc.list_units("nonsense") == []
 
     def test_detect_category_cross_category_returns_none(self, uc):
@@ -151,9 +149,8 @@ class TestErrorGuessing:
         assert uc.detect_category("kg", "m") is None
 
     def test_detect_category_returns_first_match(self, uc):
-        # EG: units that live in multiple categories - documents first-match.
-        # (In the current SPEC, each unit appears in only one category, so this
-        # just asserts the contract is deterministic.)
+        # EG: documents first-match behavior. Each unit currently appears in
+        # only one category, so this just asserts the contract is deterministic.
         assert uc.detect_category("kg", "g") == "weight"
 
     def test_convert_with_non_numeric_value_raises(self, uc):

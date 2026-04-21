@@ -1,11 +1,10 @@
 """
 Black-box tests for scripts.automation.auto_email_sender.
 
-Derived from SPEC.md Â§auto_email_sender (no peeking at implementation).
-Applies EP / BA / EG per proposal Â§2.2.
+Applies EP / BA / EG. Each test is labeled with its technique and goal.
 
-This is the **SMTP mock target** (SPEC + PLAN). All tests patch smtplib.SMTP
-so no real SMTP handshake happens.
+Primary SMTP-mock target: all tests patch smtplib.SMTP so no real
+SMTP handshake happens.
 """
 import json
 import smtplib
@@ -49,7 +48,7 @@ class TestLoadConfigEP:
         assert s.config["smtp_server"] == "x.example"
 
     def test_missing_config_file_uses_defaults(self, tmp_path):
-        # EP: config file missing -> default gmail dict per SPEC.
+        # EP: config file missing -> default gmail dict.
         s = EmailSender(config_file=str(tmp_path / "nope.json"))
         assert s.config["smtp_server"] == "smtp.gmail.com"
         assert s.config["smtp_port"] == 587
@@ -77,7 +76,7 @@ class TestSendEmailEP:
         instance.quit.assert_called_once()
 
     def test_auth_error_returns_false(self, sender):
-        # EP: SMTPAuthenticationError class -> False (swallowed per SPEC).
+        # EP: SMTPAuthenticationError class -> False (swallowed).
         with patch("smtplib.SMTP") as mock_smtp:
             mock_smtp.return_value.login.side_effect = smtplib.SMTPAuthenticationError(535, b"bad creds")
             result = sender.send_email("to@x.com", "s", "b")
@@ -152,11 +151,11 @@ class TestBoundaries:
 
 class TestErrorGuessing:
     def test_attachment_missing_path_is_silently_skipped(self, sender):
-        # EG / FAULT-HUNTING: SPEC Â§Gaps #6 flags that missing attachment paths
-        # are silently skipped (line 36 `if os.path.exists(file_path)`), so the
-        # email sends WITHOUT the expected attachment. Users likely expect
-        # either an error or a warning. This test documents the current
-        # behavior: no error, no crash, email still sent.
+        # EG / FAULT-HUNTING: missing attachment paths are silently skipped
+        # via `if os.path.exists(file_path)`, so the email sends WITHOUT
+        # the expected attachment. Users likely expect either an error or
+        # a warning. This test documents the current behavior: no error,
+        # no crash, email still sent.
         with patch("smtplib.SMTP") as mock_smtp:
             result = sender.send_email(
                 "to@x.com", "s", "b", attachments=["/tmp/does_not_exist_xyz.pdf"]
@@ -177,7 +176,7 @@ class TestErrorGuessing:
         assert "a.txt" in sent_payload
 
     def test_empty_recipient_still_calls_smtp(self, sender):
-        # EG: empty string recipient - MIME accepts; sendmail called per SPEC.
+        # EG: empty string recipient - MIME accepts; sendmail still called.
         with patch("smtplib.SMTP") as mock_smtp:
             result = sender.send_email("", "s", "b")
         assert result is True

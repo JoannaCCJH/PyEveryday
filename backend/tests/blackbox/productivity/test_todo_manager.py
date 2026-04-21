@@ -1,12 +1,11 @@
 """
 Black-box tests for scripts.productivity.todo_manager.
 
-Derived from SPEC.md Â§todo_manager (no peeking at implementation).
-Applies EP / BA / EG per proposal Â§2.2.
+Applies EP / BA / EG. Each test is labeled with its technique and goal.
 
-These tests treat the JSON-backed persistence as an external boundary
-and use `tmp_json_store` (cwd redirect) so they never touch the real
-todo_list.json at the repo root.
+Tests treat the JSON-backed persistence as an external boundary and pass
+an explicit tmp_path-based filename so the repo-root todo_list.json is
+never touched.
 """
 import datetime
 import json
@@ -138,7 +137,7 @@ class TestIndexBoundariesBA:
 
 class TestErrorGuessing:
     def test_duplicate_task_text_allowed(self, tmp_path):
-        # EG: SPEC says no uniqueness constraint. Duplicates should coexist.
+        # EG: no uniqueness constraint. Duplicates should coexist.
         mgr = _mgr(tmp_path)
         mgr.add_task("duplicate")
         mgr.add_task("duplicate")
@@ -192,7 +191,7 @@ class TestErrorGuessing:
         assert mgr2.todos[0].due_date == "2030-01-01"
 
     def test_load_corrupt_json_raises(self, tmp_path):
-        # EG: SPEC notes load_todos has no try/except - malformed JSON crashes.
+        # EG: load_todos has no try/except - malformed JSON crashes.
         filepath = tmp_path / "bad.json"
         filepath.write_text("this is not json {")
         with pytest.raises(json.JSONDecodeError):

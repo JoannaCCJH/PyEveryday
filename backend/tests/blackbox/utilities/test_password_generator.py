@@ -1,11 +1,8 @@
 """
 Black-box tests for scripts.utilities.password_generator.
 
-Derived from SPEC.md Â§password_generator without peeking at implementation.
 Applies Equivalence Partitioning (EP), Boundary Analysis (BA), and Error
-Guessing (EG) per proposal Â§2.2. Each test case is labeled with the
-technique and the specific goal it serves (rubric: "every test case must
-have a clear justification").
+Guessing (EG). Each test is labeled with its technique and goal.
 """
 import string
 
@@ -44,12 +41,12 @@ class TestGenerateRandomPasswordEP:
         assert len(pwd) == 12
 
     def test_invalid_length_below_min_raises(self, gen):
-        # EP: length<4 is the invalid class -> ValueError per SPEC.
+        # EP: length<4 is the invalid class -> ValueError.
         with pytest.raises(ValueError):
             gen.generate_random_password(length=3)
 
     def test_all_character_types_disabled_raises(self, gen):
-        # EP: empty char-type set is the invalid class -> ValueError per SPEC.
+        # EP: empty char-type set is the invalid class -> ValueError.
         with pytest.raises(ValueError):
             gen.generate_random_password(
                 length=8,
@@ -136,17 +133,12 @@ class TestGenerateHexPasswordBA:
 # =========================================================================
 
 class TestErrorGuessing:
-    """
-    EG tests target fault-prone scenarios identified in SPEC Â§Gaps #6.
-    """
+    """EG tests target fault-prone scenarios."""
 
     def test_exclude_ambiguous_never_emits_ambiguous_chars(self, gen):
-        # EG / FAULT-HUNTING: SPEC Â§Gaps #6 suspects that required_chars are
-        # sampled from the UNFILTERED character sets, which would mean the
-        # generator leaks {0, O, 1, l, I} even when exclude_ambiguous=True.
-        # Stress the code over many iterations so the leak path is likely hit.
-        # This test is intentionally designed to FAIL if the suspected fault
-        # exists (rubric: discover real faults).
+        # EG / FAULT-HUNTING: with exclude_ambiguous=True the generator must
+        # never emit any char from {0, O, 1, l, I}. Stress many iterations so
+        # the required-char path is exercised. See FINDINGS.md FAULT-001.
         offenders = set()
         for _ in range(500):
             pwd = gen.generate_random_password(
@@ -169,8 +161,8 @@ class TestErrorGuessing:
         assert gen.generate_custom_pattern("") == ""
 
     def test_check_strength_empty_string_does_not_crash(self, gen):
-        # EG: empty password is a corner case. Must be handled without raising.
-        # Expected per SPEC: length=0, unique_chars=0, score=0/"Very Weak".
+        # EG: empty password must be handled without raising.
+        # Expected: length=0, unique_chars=0, strength="Very Weak".
         result = gen.check_password_strength("")
         assert result["length"] == 0
         assert result["unique_chars"] == 0
@@ -219,7 +211,7 @@ class TestMemorableEP:
         assert pwd.count('-') == 2
 
     def test_memorable_include_numbers_appends_two_digits(self, gen, fixed_secrets):
-        # EP: include_numbers=True class -> exactly 2 trailing digits per SPEC.
+        # EP: include_numbers=True -> exactly 2 trailing digits.
         pwd = gen.generate_memorable_password(num_words=2, include_numbers=True)
         assert pwd[-2:].isdigit()
 
@@ -236,7 +228,7 @@ class TestPassphraseEP:
         assert len(pwd.split(' ')) == 4
 
     def test_passphrase_words_are_capitalized(self, gen, fixed_secrets):
-        # EP: each word capitalized per SPEC.
+        # EP: each word capitalized.
         pwd = gen.generate_passphrase(num_words=4)
         assert all(p[0].isupper() for p in pwd.split(' '))
 
