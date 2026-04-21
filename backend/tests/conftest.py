@@ -34,6 +34,30 @@ def fixed_random():
 
 
 @pytest.fixture
+def fixed_secrets(monkeypatch):
+    import secrets as _secrets
+
+    rng = random.Random(0)
+
+    def _choice(seq):
+        return rng.choice(list(seq))
+
+    def _randbelow(n):
+        return rng.randrange(n)
+
+    def _token_hex(nbytes=32):
+        return rng.randbytes(nbytes).hex()
+
+    monkeypatch.setattr(_secrets, "choice", _choice)
+    monkeypatch.setattr(_secrets, "randbelow", _randbelow)
+    monkeypatch.setattr(_secrets, "token_hex", _token_hex)
+    monkeypatch.setattr(
+        _secrets.SystemRandom, "shuffle", lambda self, seq: rng.shuffle(seq)
+    )
+    yield rng
+
+
+@pytest.fixture
 def frozen_time():
     fixed = datetime(2026, 4, 19, 12, 0, 0)
 
