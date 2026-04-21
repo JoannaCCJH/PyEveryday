@@ -1,10 +1,9 @@
 """
 Black-box tests for routers.auth.router (the only router mounted in app.py).
 
-Derived from SPEC.md Â§auth router (no peeking at implementation).
-Applies EP / BA / EG per proposal Â§2.2.
+Applies EP / BA / EG. Each test is labeled with its technique and goal.
 
-SPEC caveat: the endpoint body is `pass`; business logic is not implemented.
+Caveat: the endpoint body is `pass`; business logic is not implemented.
 These tests therefore only validate the Pydantic schema + FastAPI wiring:
 accepted-payload class -> 201, rejected-payload class -> 422, etc.
 """
@@ -38,7 +37,7 @@ class TestSignupEP:
     """
 
     def test_valid_payload_returns_201(self, client):
-        # EP: valid class -> 201 per SPEC.
+        # EP: valid payload -> 201.
         r = client.post(SIGNUP_URL, json=_payload())
         assert r.status_code == 201
 
@@ -120,7 +119,7 @@ class TestErrorGuessing:
         assert r.status_code == 405
 
     def test_lowercase_path_returns_404(self, client):
-        # EG: SPEC notes the path is /Signup (capital S). Lowercase should 404.
+        # EG: the path is /Signup (capital S). Lowercase should 404.
         r = client.post("/api/v1.0/auth/signup", json=_payload())
         assert r.status_code == 404
 
