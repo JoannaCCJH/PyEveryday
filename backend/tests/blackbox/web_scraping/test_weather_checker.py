@@ -1,11 +1,10 @@
 """
 Black-box tests for scripts.web_scraping.weather_checker.
 
-Derived from SPEC.md Â§weather_checker (no peeking at implementation).
-Applies EP / BA / EG per proposal Â§2.2.
+Applies EP / BA / EG. Each test is labeled with its technique and goal.
 
-This is the **HTTP mock target** (SPEC + PLAN). All tests use
-unittest.mock.patch on requests.get - no network call is made.
+Primary HTTP-mock target: all tests patch requests.get so no network
+call is made.
 """
 from unittest.mock import MagicMock, patch
 
@@ -77,7 +76,7 @@ class TestGetWeatherByCityEP:
         assert result["description"] == "Partly cloudy"
 
     def test_request_exception_falls_back_to_free(self):
-        # EP: network failure class -> fallback path per SPEC.
+        # EP: network failure class -> fallback to the free API.
         checker = WeatherChecker(api_key="abc")
 
         def _side_effect(url, **kw):
@@ -104,7 +103,7 @@ class TestGetWeatherByCityEP:
 
 class TestGetWeatherByCoordinatesEP:
     def test_no_api_key_returns_none(self):
-        # EP: coordinates require api_key per SPEC.
+        # EP: coordinates require api_key.
         checker = WeatherChecker()
         with patch("requests.get") as mock_get:
             assert checker.get_weather_by_coordinates(51.5, -0.1) is None
@@ -139,8 +138,8 @@ class TestBoundaries:
         assert mock_get.call_args.kwargs["params"]["cnt"] == 8
 
     def test_zero_days_produces_zero_cnt(self):
-        # BA: edge value days=0 -> cnt=0 (documents current behavior; not
-        # validated as an input constraint anywhere in SPEC).
+        # BA: edge value days=0 -> cnt=0. Documents current behavior; the
+        # function does not validate days as an input constraint.
         checker = WeatherChecker(api_key="abc")
         with patch("requests.get", return_value=_ok_response({
             "city": {"name": "X"},
@@ -150,7 +149,7 @@ class TestBoundaries:
         assert mock_get.call_args.kwargs["params"]["cnt"] == 0
 
     def test_request_uses_10_second_timeout(self):
-        # BA: SPEC documents a 10s timeout. Verify it's passed through.
+        # BA: the module uses a 10s timeout. Verify it's passed through.
         checker = WeatherChecker(api_key="abc")
         with patch("requests.get", return_value=_ok_response(OPENWEATHER_OK_JSON)) as mock_get:
             checker.get_weather_by_city("X")
@@ -190,11 +189,11 @@ class TestErrorGuessing:
         assert result is not None
 
     def test_missing_wind_key_crashes_format(self):
-        # EG / FAULT-HUNTING: SPEC Â§Gaps #6 warns that format_weather_data
-        # crashes on ANY missing required key (except visibility which uses
-        # .get). A well-formed HTTP 200 with no 'wind' is a plausible upstream
-        # contract change. Designed to FAIL: intended contract per SPEC is
-        # consistent error handling, not KeyError bubbling up.
+        # EG / FAULT-HUNTING: format_weather_data crashes on ANY missing
+        # required key (except visibility which uses .get). A well-formed
+        # HTTP 200 with no 'wind' is a plausible upstream contract change.
+        # Intended contract is consistent error handling, not KeyError
+        # bubbling up.
         checker = WeatherChecker(api_key="abc")
         payload = dict(OPENWEATHER_OK_JSON)
         payload.pop("wind")
@@ -218,7 +217,7 @@ class TestErrorGuessing:
         assert len(data) == 2
 
     def test_display_weather_does_not_crash_on_none(self, capsys):
-        # EG: display_weather(None) per SPEC prints "No weather data available".
+        # EG: display_weather(None) prints "No weather data available".
         checker = WeatherChecker()
         checker.display_weather(None)
         out = capsys.readouterr().out

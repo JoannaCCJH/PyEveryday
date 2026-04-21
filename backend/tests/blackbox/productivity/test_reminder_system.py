@@ -1,8 +1,7 @@
 """
 Black-box tests for scripts.productivity.reminder_system.
 
-Derived from SPEC.md Â§reminder_system (no peeking at implementation).
-Applies EP / BA / EG per proposal Â§2.2.
+Applies EP / BA / EG. Each test is labeled with its technique and goal.
 """
 import datetime
 import json
@@ -41,7 +40,7 @@ class TestAddRemoveEP:
         assert mgr.reminders == []
 
     def test_remove_nonexistent_id_is_silent(self, tmp_path):
-        # EP: remove non-existent id -> no change, no raise per SPEC.
+        # EP: remove non-existent id -> no change, no raise.
         mgr = _mgr(tmp_path)
         mgr.add_reminder("x", datetime.datetime(2030, 1, 1))
         mgr.remove_reminder("this-id-does-not-exist")
@@ -63,7 +62,7 @@ class TestCalculateNextTimeEP:
         assert mgr.calculate_next_time(t0, interval) == t0 + delta
 
     def test_unknown_suffix_fallback_to_one_hour(self, tmp_path):
-        # EP: unknown-suffix class -> falls back to +1h per SPEC.
+        # EP: unknown-suffix class -> falls back to +1h.
         mgr = _mgr(tmp_path)
         t0 = datetime.datetime(2030, 1, 1, 0, 0)
         result = mgr.calculate_next_time(t0, "bogus_interval")
@@ -78,7 +77,7 @@ class TestParseTimeStringEP:
         assert result == datetime.datetime(2030, 1, 1, 10, 0, 0)
 
     def test_invalid_format_returns_none(self, tmp_path):
-        # EP: invalid-format class -> None per SPEC.
+        # EP: invalid-format class -> None.
         mgr = _mgr(tmp_path)
         assert mgr.parse_time_string("not a time") is None
 
@@ -102,7 +101,7 @@ class TestBoundaries:
         assert mgr.calculate_next_time(t0, "0m") == t0
 
     def test_check_reminders_at_exact_trigger_time(self, tmp_path, monkeypatch):
-        # BA: reminder_time == now (boundary - should trigger per SPEC '<=').
+        # BA: reminder_time == now (boundary - should trigger since '<=').
         mgr = _mgr(tmp_path)
         fixed_now = datetime.datetime(2030, 1, 1, 10, 0, 0)
 
@@ -172,8 +171,8 @@ class TestErrorGuessing:
         assert mgr2.reminders[0].reminder_time == fire
 
     def test_id_collision_when_created_within_same_millisecond(self, tmp_path, monkeypatch):
-        # EG / FAULT-HUNTING: SPEC Â§Gaps #6 warns that ID = int(time.time()*1000).
-        # Two reminders created in the same ms share an ID. Demonstrates the
+        # EG / FAULT-HUNTING: ID = int(time.time()*1000). Two reminders
+        # created in the same millisecond share an ID. Demonstrates the
         # risk by freezing time.time().
         mgr = _mgr(tmp_path)
         monkeypatch.setattr("scripts.productivity.reminder_system.time.time", lambda: 1700000000.0)

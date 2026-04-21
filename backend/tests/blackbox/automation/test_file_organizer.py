@@ -1,9 +1,8 @@
 """
 Black-box tests for scripts.automation.file_organizer.
 
-Derived from SPEC.md Â§file_organizer (no peeking at implementation).
-Applies EP / BA / EG per proposal Â§2.2. Uses tmp_path for real
-filesystem isolation (no mocks).
+Applies EP / BA / EG. Each test is labeled with its technique and goal.
+Uses tmp_path for real filesystem isolation (no mocks).
 """
 import os
 
@@ -53,7 +52,7 @@ class TestOrganizeByExtensionEP:
         assert (tmp_path / "json" / "c.json").exists()
 
     def test_file_without_extension_goes_to_no_extension_folder(self, tmp_path):
-        # EP: no-extension class per SPEC.
+        # EP: no-extension class.
         _touch(tmp_path, "README")
         organize_files_by_extension(str(tmp_path))
         assert (tmp_path / "no_extension" / "README").exists()
@@ -105,21 +104,21 @@ class TestBoundaries:
 
 class TestErrorGuessing:
     def test_multi_dot_filename_uses_last_suffix_only(self, tmp_path):
-        # EG: SPEC documents multi-dot behavior: `a.tar.gz` -> suffix == `.gz`.
+        # EG: multi-dot behavior: `a.tar.gz` -> suffix == `.gz`.
         _touch(tmp_path, "archive.tar.gz")
         organize_files_by_extension(str(tmp_path))
         assert (tmp_path / "gz" / "archive.tar.gz").exists()
         assert not (tmp_path / "tar.gz").exists()
 
     def test_mixed_case_extension_normalized_lowercase(self, tmp_path):
-        # EG: SPEC says .lower() is applied - uppercase extension goes to
-        # the lowercase-named folder.
+        # EG: .lower() is applied -> uppercase extension goes to the
+        # lowercase-named folder.
         _touch(tmp_path, "image.JPG")
         organize_files_by_extension(str(tmp_path))
         assert (tmp_path / "jpg" / "image.JPG").exists()
 
     def test_hidden_dotfile_has_no_extension_per_pathlib(self, tmp_path):
-        # EG: SPEC documents that `.bashrc` -> suffix == "" -> no_extension/.
+        # EG: pathlib treats `.bashrc` as having no suffix -> no_extension/.
         _touch(tmp_path, ".bashrc")
         organize_files_by_extension(str(tmp_path))
         assert (tmp_path / "no_extension" / ".bashrc").exists()
