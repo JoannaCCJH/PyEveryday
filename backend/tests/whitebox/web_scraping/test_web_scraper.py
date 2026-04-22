@@ -1,12 +1,13 @@
 """Whitebox coverage for ``scripts/web_scraping/web_scraper.py``.
 
-Trimmed to: get_page (success + error), text scraping with selectors, link
-filtering, table parsing, JSON save, and page metadata extraction.
+Slimmed: CLI tests already drive the scrape_* commands.  We keep the
+return-value assertions for ``get_page`` (success/failure), ``scrape_text``
+with a custom selector dict, and the ``scrape_forms`` shape because the
+form output keys are not visible from ``stdout`` alone.
 """
 
 from __future__ import annotations
 
-import json
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -47,46 +48,13 @@ class TestScrapeText:
         assert out["titles"] == ["A", "B"]
 
 
-class TestScrapeLinks:
-    def test_with_filter(self, s):
-        html = b"<a href='/x.pdf'>x</a><a href='/y.html'>y</a>"
+class TestScrapeForms:
+    def test_scrape_forms(self, s):
+        html = b"""<form action='/submit' method='post'>
+            <input type='text' name='q'/>
+            <input type='submit' value='Go'/>
+        </form>"""
         with patch.object(s, "get_page", return_value=_resp(html)):
-            out = s.scrape_links("https://example.com", filter_pattern=r"\.pdf$")
-        assert len(out) == 1 and out[0]["url"].endswith(".pdf")
-
-
-class TestScrapeTable:
-    def test_parses_table(self, s):
-        html = b"""<table>
-            <tr><th>a</th><th>b</th></tr>
-            <tr><td>1</td><td>2</td></tr>
-            <tr><td>3</td><td>4</td></tr>
-        </table>"""
-        with patch.object(s, "get_page", return_value=_resp(html)):
-            out = s.scrape_table("u")
-        assert out[0]["headers"] == ["a", "b"]
-        assert out[0]["rows"] == [["1", "2"], ["3", "4"]]
-
-
-class TestSaveData:
-    def test_json(self, s, tmp_path):
-        p = tmp_path / "x.json"
-        s.save_data([{"a": 1}], str(p), "json")
-        assert json.loads(p.read_text(encoding="utf-8")) == [{"a": 1}]
-
-
-class TestMetadata:
-    def test_extracts_metadata(self, s):
-        html = b"""<html lang='en'><head>
-            <title>The Title</title>
-            <meta name='description' content='desc'/>
-            <meta name='keywords' content='k1,k2'/>
-            <meta name='author' content='me'/>
-            <meta charset='utf-8'/>
-            <link rel='canonical' href='https://canon'/>
-        </head></html>"""
-        with patch.object(s, "get_page", return_value=_resp(html)):
-            out = s.get_page_metadata("u")
-        assert out["title"] == "The Title"
-        assert out["description"] == "desc"
-        assert out["canonical_url"] == "https://canon"
+            out = s.scrape_forms("https://example.com")
+        assert len(out) == 1 and out[0]["method"].upper() == "POST"
+        assert any(inp["name"] == "q" for inp in out[0]["fields"])

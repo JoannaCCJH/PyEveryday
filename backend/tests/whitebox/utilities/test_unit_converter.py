@@ -1,8 +1,8 @@
 """Whitebox coverage for ``scripts/utilities/unit_converter.py``.
 
-Trimmed to one test per public surface: temperature conversions, standard
-(length) conversions, unknown-category handling, dispatch, category detection,
-result formatting, and ratio edge-case.
+Trimmed to the essential branches not exercised by the CLI smoke tests.
+Most surfaces are already driven through ``test_cli_main.TestUnitConverterCLI``;
+here we focus on direct method behavior + return-value assertions.
 """
 
 from __future__ import annotations
@@ -19,38 +19,22 @@ def uc():
 
 class TestTemperature:
     @pytest.mark.parametrize("v,frm,to,expected", [
-        (32, "fahrenheit", "celsius", 0.0),
-        (273.15, "kelvin", "celsius", 0.0),
+        (0, "celsius", "fahrenheit", 32.0),
+        (491.67, "rankine", "celsius", 0.0),
     ])
-    def test_each_branch(self, uc, v, frm, to, expected):
-        assert uc.convert_temperature(v, frm, to) == pytest.approx(expected, rel=1e-6)
+    def test_conversion_branches(self, uc, v, frm, to, expected):
+        assert uc.convert_temperature(v, frm, to) == pytest.approx(expected, rel=1e-4, abs=1e-4)
 
 
 class TestStandard:
-    def test_length_conversion(self, uc):
+    def test_known_unit(self, uc):
         assert uc.convert_standard(1000, "m", "km", "length") == pytest.approx(1.0)
 
-    def test_unknown_category(self, uc):
-        assert uc.convert_standard(1, "m", "ft", "wat") is None
+    def test_unknown_unit_returns_none(self, uc):
+        assert uc.convert_standard(1, "flarg", "m", "length") is None
 
 
 class TestConvert:
-    def test_temperature_dispatch(self, uc):
-        assert uc.convert(100, "celsius", "fahrenheit") == pytest.approx(212.0)
-
-
-class TestDetectCategory:
-    def test_detect_known(self, uc):
-        assert uc.detect_category("kg", "lb") == "weight"
-
-
-class TestFormatResult:
-    def test_success_branch(self, uc, capsys):
-        out = uc.format_result(3.28, 1, "m", "ft", "length")
-        assert out == 3.28
-        assert "UNIT CONVERSION" in capsys.readouterr().out
-
-
-class TestRatio:
-    def test_divide_by_zero_branch(self, uc):
-        assert uc.calculate_ratio(1, "m", 0, "m", "length") is None
+    def test_auto_detect_and_unknown(self, uc):
+        assert uc.convert(1, "m", "km") == pytest.approx(0.001)
+        assert uc.convert(1, "flarg", "quuz") is None

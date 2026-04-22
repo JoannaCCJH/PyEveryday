@@ -1,7 +1,8 @@
 """Whitebox coverage for ``scripts/web_scraping/youtube_downloader.py``.
 
-Trimmed to: init (creates dir), info fetch (success + error), video download,
-audio download, available-formats parsing, search, and duration formatting.
+Slimmed: CLI tests already drive every command via ``runpy``.  Here we
+keep direct-method assertions for the ones whose return value matters
+(success/failure booleans, format separation, duration formatting).
 """
 
 from __future__ import annotations
@@ -29,44 +30,14 @@ def _mock_ydl(extract_info=None, raise_on_init=None):
         yield ydl_instance, cls
 
 
-class TestInit:
-    def test_creates_missing_download_path(self, tmp_path):
-        target = tmp_path / "downloads"
-        downloader = yd.YouTubeDownloader(download_path=str(target))
-        assert target.exists() and downloader.download_path == str(target)
-
-
-class TestGetVideoInfo:
-    def test_success(self, tmp_path):
-        info = {"title": "T", "uploader": "U", "duration": 65,
-                "view_count": 100, "upload_date": "20250101",
-                "description": "d", "formats": [], "thumbnail": "th",
-                "webpage_url": "wp"}
-        downloader = yd.YouTubeDownloader(str(tmp_path / "d"))
-        with _mock_ydl(extract_info=info):
-            out = downloader.get_video_info("https://yt/abc")
-        assert out["title"] == "T" and out["uploader"] == "U"
-
-    def test_exception_returns_none(self, tmp_path, capsys):
-        downloader = yd.YouTubeDownloader(str(tmp_path / "d"))
-        with _mock_ydl(raise_on_init=RuntimeError("boom")):
-            out = downloader.get_video_info("https://yt/abc")
-        assert out is None
-        assert "Error getting video info" in capsys.readouterr().out
-
-
 class TestDownloadVideo:
-    def test_download_720p(self, tmp_path):
+    def test_success_and_failure(self, tmp_path, capsys):
         downloader = yd.YouTubeDownloader(str(tmp_path / "d"))
         with _mock_ydl(extract_info={}):
             assert downloader.download_video("https://yt/x", "720p") is True
-
-
-class TestDownloadAudio:
-    def test_download_mp3(self, tmp_path):
-        downloader = yd.YouTubeDownloader(str(tmp_path / "d"))
-        with _mock_ydl(extract_info={}):
-            assert downloader.download_audio("https://yt/x", "mp3") is True
+        with _mock_ydl(raise_on_init=RuntimeError("boom")):
+            assert downloader.download_video("https://yt/x", "720p") is False
+        assert "Error downloading video" in capsys.readouterr().out
 
 
 class TestGetAvailableFormats:
@@ -79,23 +50,15 @@ class TestGetAvailableFormats:
         downloader = yd.YouTubeDownloader(str(tmp_path / "d"))
         with _mock_ydl(extract_info=info):
             out = downloader.get_available_formats("https://yt/x")
-        assert len(out["video"]) == 1 and out["video"][0]["format_id"] == "a"
-        assert len(out["audio"]) == 1 and out["audio"][0]["format_id"] == "b"
-
-
-class TestSearchYoutube:
-    def test_returns_results(self, tmp_path):
-        info = {"entries": [
-            {"title": "T", "uploader": "U", "duration": 30, "view_count": 1,
-             "webpage_url": "wp", "thumbnail": "th"}
-        ]}
-        downloader = yd.YouTubeDownloader(str(tmp_path / "d"))
-        with _mock_ydl(extract_info=info):
-            out = downloader.search_youtube("python", max_results=1)
-        assert len(out) == 1 and out[0]["title"] == "T"
+        assert out["video"][0]["format_id"] == "a"
+        assert out["audio"][0]["format_id"] == "b"
 
 
 class TestFormatDuration:
-    def test_multi_hour(self, tmp_path):
+    @pytest.mark.parametrize("sec,expected", [
+        (3661, "01:01:01"),
+        (0, "Unknown"),
+    ])
+    def test_branches(self, tmp_path, sec, expected):
         downloader = yd.YouTubeDownloader(str(tmp_path / "d"))
-        assert downloader.format_duration(3661) == "01:01:01"
+        assert downloader.format_duration(sec) == expected

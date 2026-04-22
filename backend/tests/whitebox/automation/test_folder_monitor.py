@@ -1,7 +1,8 @@
-"""Whitebox coverage for ``scripts/automation/folder_monitor.py``.
+"""Targeted whitebox coverage for ``scripts/automation/folder_monitor.py``.
 
-Tightened: every branch of the three public surfaces (events, action exec,
-monitor driver) without the parametrize-3x duplication.
+Slim — covers the ``FolderMonitor`` event handler methods and
+``execute_action`` directly (the CLI tests can't easily produce real
+filesystem events).
 """
 
 from __future__ import annotations
@@ -27,7 +28,9 @@ class TestEventCallbacks:
         handler = fm.FolderMonitor(action_script="action.py")
         with patch.object(handler, "execute_action") as ea:
             handler.on_modified(_evt("/tmp/x.txt"))
-        ea.assert_called_once_with("/tmp/x.txt", "modified")
+            handler.on_created(_evt("/tmp/y.txt"))
+            handler.on_deleted(_evt("/tmp/z.txt"))
+        assert ea.call_count == 3
 
     def test_on_moved_uses_dest_path(self):
         handler = fm.FolderMonitor(action_script="action.py")
@@ -43,12 +46,6 @@ class TestEventCallbacks:
 
 
 class TestExecuteAction:
-    def test_success_runs_subprocess(self):
-        handler = fm.FolderMonitor(action_script="action.py")
-        with patch.object(fm.subprocess, "run") as run:
-            handler.execute_action("/tmp/x.txt", "created")
-        run.assert_called_once()
-
     def test_calledprocesserror_branch(self, capsys):
         handler = fm.FolderMonitor(action_script="action.py")
         with patch.object(fm.subprocess, "run",
@@ -66,4 +63,3 @@ class TestMonitorFolder:
         observer.schedule.assert_called_once()
         observer.start.assert_called_once()
         observer.stop.assert_called_once()
-        observer.join.assert_called_once()

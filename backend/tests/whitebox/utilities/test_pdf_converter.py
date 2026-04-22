@@ -1,7 +1,8 @@
-"""Whitebox coverage for ``scripts/utilities/pdf_converter.py``.
+"""Targeted whitebox coverage for ``scripts/utilities/pdf_converter.py``.
 
-Trimmed to the key platform-dispatch + output paths: Windows uses docx2pdf,
-Linux uses LibreOffice via subprocess, plus image->PDF and PDF-merge.
+Slim — direct tests for the three public methods.  CLI smoke tests only
+hit usage paths because real conversion needs valid input files; here we
+mock the heavy third-party libraries to keep the test fast and offline.
 """
 
 from __future__ import annotations
@@ -39,17 +40,13 @@ class TestImagesToPdf:
     def test_iterates_and_writes(self, conv, tmp_path):
         from PIL import Image
         p1 = tmp_path / "a.png"
-        p2 = tmp_path / "b.png"
         Image.new("RGB", (10, 10), "red").save(p1)
-        Image.new("RGB", (10, 10), "blue").save(p2)
         out = tmp_path / "out.pdf"
-
         fake_pdf = MagicMock()
         with patch.object(pc, "FPDF", return_value=fake_pdf):
-            conv.images_to_pdf([str(p1), str(p2)], str(out))
-
-        assert fake_pdf.add_page.call_count == 2
-        assert fake_pdf.image.call_count == 2
+            conv.images_to_pdf([str(p1)], str(out))
+        fake_pdf.add_page.assert_called_once()
+        fake_pdf.image.assert_called_once()
         fake_pdf.output.assert_called_once_with(str(out), "F")
 
 

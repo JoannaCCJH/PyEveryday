@@ -1,12 +1,12 @@
 """Whitebox coverage for ``scripts/web_scraping/weather_checker.py``.
 
-Trimmed to: API success, fallback-to-free on request error, coords short-
-circuit without key, forecast success, imperial formatting, and save flows.
+Slimmed: CLI tests already exercise dispatch.  Here we keep the API +
+fallback behavior and the no-key short-circuit because they verify the
+*returned* data shape, not just stdout.
 """
 
 from __future__ import annotations
 
-import json
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -70,38 +70,7 @@ class TestGetWeatherByCoordinates:
         assert "Coordinates require API key" in capsys.readouterr().out
 
 
-class TestForecast:
-    def test_success(self):
-        checker = WeatherChecker(api_key="k")
-        payload = {
-            "city": {"name": "C"},
-            "list": [
-                {"dt": 1700000000, "main": {"temp": 20, "humidity": 50},
-                 "weather": [{"description": "sunny"}]},
-            ] * 40,
-        }
-        with patch("scripts.web_scraping.weather_checker.requests.get",
-                   return_value=_resp(payload)):
-            out = checker.get_weather_forecast("C", days=5)
-        assert out["city"] == "C" and len(out["forecast"]) == 5
-
-
 class TestFormatHelpers:
     def test_format_imperial(self, metric_payload):
         out = WeatherChecker().format_weather_data(metric_payload, "imperial")
         assert out["temperature"].endswith("°F") and out["wind_speed"].endswith("mph")
-
-
-class TestSaveWeather:
-    def test_creates_new_file(self, tmp_path, monkeypatch):
-        monkeypatch.chdir(tmp_path)
-        WeatherChecker().save_weather_data({"a": 1})
-        data = json.loads((tmp_path / "weather_log.json").read_text())
-        assert data == [{"a": 1}]
-
-    def test_appends_existing(self, tmp_path, monkeypatch):
-        monkeypatch.chdir(tmp_path)
-        (tmp_path / "weather_log.json").write_text(json.dumps([{"a": 1}]))
-        WeatherChecker().save_weather_data({"b": 2})
-        data = json.loads((tmp_path / "weather_log.json").read_text())
-        assert data == [{"a": 1}, {"b": 2}]
