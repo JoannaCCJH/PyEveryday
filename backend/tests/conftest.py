@@ -8,8 +8,10 @@ from unittest.mock import patch
 import pytest
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
-if str(BACKEND_DIR) not in sys.path:
-    sys.path.insert(0, str(BACKEND_DIR))
+REPO_ROOT = BACKEND_DIR.parent
+for p in (str(BACKEND_DIR), str(REPO_ROOT)):
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 
 @pytest.fixture
