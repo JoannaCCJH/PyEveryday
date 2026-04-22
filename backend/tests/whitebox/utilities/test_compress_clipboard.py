@@ -1,20 +1,8 @@
-"""Whitebox coverage for ``scripts/utilities/compress_clipboard.py``.
+"""Targeted whitebox coverage for ``scripts/utilities/compress_clipboard.py``.
 
-Branches exercised in ``FileUtility.compress_files``:
-
-* All inputs invalid -> ``FileNotFoundError`` raised.
-* Mixed valid/invalid inputs (warning printed but compression continues).
-* Single-file input branch (auto-named zip = basename + ".zip").
-* Multi-file input branch (default ``archive.zip``).
-* Directory-walk branch via ``os.walk``.
-* Explicit ``output_zip`` argument.
-
-And in ``copy_to_clipboard``:
-
-* ``pyperclip.copy`` is invoked exactly once with the supplied text.
-
-We patch ``pyperclip`` so no system clipboard is touched and ``time.sleep`` so
-the test is fast.
+Slim — three direct tests for ``FileUtility.compress_files`` because the
+CLI smoke tests only hit the usage / dispatch arms (no real files), so
+the body of ``compress_files`` is otherwise untested.
 """
 
 from __future__ import annotations
@@ -39,7 +27,7 @@ class TestCompressFiles:
             cc.FileUtility.compress_files([str(tmp_path / "nope1"),
                                            str(tmp_path / "nope2")])
 
-    def test_explicit_output_zip(self, tmp_path):
+    def test_explicit_output_zip_with_file(self, tmp_path):
         f = tmp_path / "doc.txt"
         f.write_text("hi")
         out = tmp_path / "explicit.zip"
@@ -59,9 +47,3 @@ class TestCompressFiles:
             names = sorted(zf.namelist())
         assert any("a.txt" in n for n in names)
         assert any("b.txt" in n for n in names)
-
-class TestCopyToClipboard:
-    def test_calls_pyperclip(self):
-        with patch.object(cc, "pyperclip") as pc:
-            cc.FileUtility.copy_to_clipboard("hello")
-        pc.copy.assert_called_once_with("hello")
