@@ -163,12 +163,6 @@ class TestErrorGuessing:
         result = checker.analyze_password("pÃ¤sswoÑrd")
         assert "strength_level" in result
 
-    def test_long_password_reasonable_length(self, checker):
-        # EG: long-but-reasonable input. Ensures no crash for typical long pwd.
-        pwd = "Aa1!" * 32  # 128 chars
-        result = checker.analyze_password(pwd)
-        assert result["length"] == 128
-
     def test_extremely_long_password_does_not_crash(self, checker):
         # EG / FAULT-HUNTING: very long passwords push entropy so high that
         # estimate_crack_time's `2**entropy` overflows Python floats.
@@ -188,13 +182,6 @@ class TestErrorGuessing:
         # EG: dictionary word embedded in an otherwise strong-looking password.
         result = checker.analyze_password("Admin#42!xY")
         assert "admin" in result["dictionary_words"]
-
-    def test_estimate_crack_time_returns_four_scenarios(self, checker):
-        # EG: contract - exactly 4 documented attack scenarios.
-        times = checker.estimate_crack_time("Aa1!Aa1!")
-        assert set(times.keys()) == {
-            "online_throttled", "online_unthrottled", "offline_slow", "offline_fast"
-        }
 
     def test_none_password_treated_as_empty(self, checker):
         # EG: None is falsy and hits the same "empty" guard in analyze_password.

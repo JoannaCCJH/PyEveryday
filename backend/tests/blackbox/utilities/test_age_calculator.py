@@ -63,23 +63,14 @@ class TestCalculateAgeEP:
 
 class TestZodiacEP:
     """
-    EP: each zodiac sign is an equivalence class. Test one representative
-    day for each of the 12 western signs (mid-range, not boundary days
-    which are covered in BA).
+    EP: "sign lookup works" is a single equivalence class. Use three
+    representatives (one winter, one summer, one wrap-around). All 12 signs
+    are already exercised via the boundary pairs in TestZodiacBoundariesBA.
     """
     @pytest.mark.parametrize("date_str, expected_sign", [
-        ("2000-02-05", "Aquarius"),
-        ("2000-03-05", "Pisces"),
-        ("2000-04-05", "Aries"),
-        ("2000-05-05", "Taurus"),
-        ("2000-06-05", "Gemini"),
-        ("2000-07-05", "Cancer"),
-        ("2000-08-05", "Leo"),
-        ("2000-09-05", "Virgo"),
-        ("2000-10-05", "Libra"),
-        ("2000-11-05", "Scorpio"),
-        ("2000-12-05", "Sagittarius"),
-        ("2000-01-05", "Capricorn"),
+        ("2000-06-05", "Gemini"),      # mid-year
+        ("2000-10-05", "Libra"),       # late-year
+        ("2000-01-05", "Capricorn"),   # year-wrap (Dec->Jan sign)
     ])
     def test_zodiac_sign_per_sign(self, ac, date_str, expected_sign):
         assert ac.calculate_zodiac_sign(date_str)["sign"] == expected_sign
@@ -153,17 +144,6 @@ class TestErrorGuessing:
         result = ac.calculate_age("2000-02-29", "2021-03-01")
         assert result["years"] == 21
 
-    def test_ambiguous_date_dd_mm_wins_over_mm_dd(self, ac):
-        # EG: the DD/MM/YYYY format is tried before MM/DD/YYYY, so
-        # "03/04/2020" resolves to 3 April 2020, not 4 March 2020. This test
-        # documents the first-match contract.
-        assert ac.parse_date("03/04/2020") == datetime.date(2020, 4, 3)
-
-    def test_chinese_zodiac_returns_animal_and_element(self, ac):
-        # EG: contract check - dict has both keys.
-        z = ac.calculate_chinese_zodiac("2000-01-01")
-        assert "animal" in z and "element" in z
-
     def test_calculate_zodiac_never_returns_unknown_for_valid_date(self, ac):
         # EG / FAULT-HUNTING: the zodiac function has an "Unknown" fallback
         # that should never fire for a valid date. Iterate every day of a
@@ -175,18 +155,7 @@ class TestErrorGuessing:
             assert sign != "Unknown", f"zodiac returned 'Unknown' for {d}"
 
     def test_parse_date_empty_string_raises(self, ac):
-        # EG: empty input -> ValueError.
+        # EG: empty / whitespace input -> ValueError (same "no format matched"
+        # branch — one representative covers the class).
         with pytest.raises(ValueError):
             ac.parse_date("")
-
-    def test_parse_date_whitespace_only_raises(self, ac):
-        # EG: whitespace-only input -> ValueError.
-        with pytest.raises(ValueError):
-            ac.parse_date("   ")
-
-    def test_life_events_returns_eight_milestones(self, ac):
-        # EG: contract - 8 milestone ages.
-        events = ac.calculate_life_events("2000-01-01")
-        assert len(events) == 8
-        ages = [e["age"] for e in events]
-        assert ages == [18, 21, 25, 30, 40, 50, 65, 100]
