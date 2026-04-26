@@ -97,22 +97,22 @@ case "$CATEGORY" in
   utilities)
     run_one utilities backend/scripts/utilities \
       "$(build_deselect_args "${DESELECT_UTILITIES[@]}")" \
-      backend/tests/blackbox/utilities backend/tests/whitebox/utilities
+      backend/tests/blackbox/utilities backend/tests/whitebox/utilities backend/tests/cli/test_utilities.py
     ;;
   machine_learning)
     run_one machine_learning backend/scripts/MachineLearning \
       "$(build_deselect_args "${DESELECT_ML[@]}")" \
-      backend/tests/blackbox/MachineLearning backend/tests/whitebox/machine_learning
+      backend/tests/blackbox/MachineLearning backend/tests/whitebox/machine_learning backend/tests/cli/test_machine_learning.py
     ;;
   automation)
     run_one automation backend/scripts/automation \
       "$(build_deselect_args "${DESELECT_AUTOMATION[@]}")" \
-      backend/tests/blackbox/automation backend/tests/whitebox/automation
+      backend/tests/blackbox/automation backend/tests/whitebox/automation backend/tests/cli/test_automation.py
     ;;
   web_scraping)
     run_one web_scraping backend/scripts/web_scraping \
       "" \
-      backend/tests/blackbox/web_scraping backend/tests/whitebox/web_scraping
+      backend/tests/blackbox/web_scraping backend/tests/whitebox/web_scraping backend/tests/cli/test_web_scraping.py
     ;;
   all)
     "$0" utilities
