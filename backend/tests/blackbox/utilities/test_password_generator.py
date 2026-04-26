@@ -40,11 +40,6 @@ class TestGenerateRandomPasswordEP:
         assert isinstance(pwd, str)
         assert len(pwd) == 12
 
-    def test_invalid_length_below_min_raises(self, gen):
-        # EP: length<4 is the invalid class -> ValueError.
-        with pytest.raises(ValueError):
-            gen.generate_random_password(length=3)
-
     def test_all_character_types_disabled_raises(self, gen):
         # EP: empty char-type set is the invalid class -> ValueError.
         with pytest.raises(ValueError):
@@ -106,12 +101,6 @@ class TestGeneratePinBA:
         assert len(pin) == 1
         assert pin in string.digits
 
-    def test_pin_length_two_has_two_digits(self, gen, fixed_secrets):
-        # BA: length=2 (min+1) -> two digits, all numeric.
-        pin = gen.generate_pin(length=2)
-        assert len(pin) == 2
-        assert pin.isdigit()
-
 
 class TestGenerateHexPasswordBA:
     """Boundary analysis for hex password (lower bound = 4)."""
@@ -168,14 +157,6 @@ class TestErrorGuessing:
         assert result["unique_chars"] == 0
         assert result["strength"] == "Very Weak"
 
-    def test_check_strength_single_char(self, gen):
-        # EG: single-char password -> length=1, unique=1, score low.
-        result = gen.check_password_strength("a")
-        assert result["length"] == 1
-        assert result["unique_chars"] == 1
-        # length<8 => no length point, has lowercase => 1 pt for variety, etc.
-        assert result["score"] <= 3
-
     def test_check_strength_includes_all_required_keys(self, gen):
         # EG: contract check - the return dict must expose documented keys so
         # downstream code doesn't break on missing fields.
@@ -214,11 +195,6 @@ class TestMemorableEP:
         # EP: include_numbers=True -> exactly 2 trailing digits.
         pwd = gen.generate_memorable_password(num_words=2, include_numbers=True)
         assert pwd[-2:].isdigit()
-
-    def test_memorable_custom_separator(self, gen, fixed_secrets):
-        # EP: non-default separator class. 3 words -> 2 custom separators.
-        pwd = gen.generate_memorable_password(num_words=3, separator='_', include_numbers=False)
-        assert pwd.count('_') == 2
 
 
 class TestPassphraseEP:

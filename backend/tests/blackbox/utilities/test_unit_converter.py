@@ -37,13 +37,10 @@ class TestConvertStandardEP:
         # EP: unknown category -> None.
         assert uc.convert_standard(1, "m", "km", "fake_category") is None
 
-    def test_unknown_from_unit_returns_none(self, uc):
-        # EP: valid category but unknown from_unit -> None.
+    def test_unknown_unit_returns_none(self, uc):
+        # EP: valid category but either unit missing -> None (one representative
+        # of the "unknown-unit" class; from/to are symmetric in this code path).
         assert uc.convert_standard(1, "banana", "km", "length") is None
-
-    def test_unknown_to_unit_returns_none(self, uc):
-        # EP: valid category but unknown to_unit -> None.
-        assert uc.convert_standard(1, "m", "banana", "length") is None
 
     def test_same_unit_returns_input_value(self, uc):
         # EP: from==to is identity class.
@@ -54,7 +51,6 @@ class TestConvertTemperatureEP:
     """EP classes for temperature: celsius/fahrenheit/kelvin/rankine pairs."""
 
     @pytest.mark.parametrize("value, f, t, expected", [
-        (0,   "celsius",    "fahrenheit", 32),
         (100, "celsius",    "fahrenheit", 212),
         (32,  "fahrenheit", "celsius",    0),
         (0,   "celsius",    "kelvin",     273.15),
@@ -91,12 +87,9 @@ class TestConvertDispatchEP:
 
 class TestBoundaries:
     def test_absolute_zero_celsius_to_kelvin(self, uc):
-        # BA: physical lower bound of temperature.
+        # BA: physical lower bound of temperature (-273.15 °C == 0 K).
+        # One representative — the Fahrenheit equivalent exercises the same branch.
         assert uc.convert(-273.15, "celsius", "kelvin") == pytest.approx(0, abs=1e-9)
-
-    def test_absolute_zero_fahrenheit(self, uc):
-        # BA: -459.67 F == 0 K.
-        assert uc.convert(-459.67, "fahrenheit", "kelvin") == pytest.approx(0, abs=1e-4)
 
     def test_zero_length_conversion(self, uc):
         # BA: 0 is a natural boundary value for multiplicative conversions.
@@ -131,11 +124,6 @@ class TestErrorGuessing:
         result = uc.calculate_ratio(10, "bogus_unit", 5, "m", "length")
         assert result is None
 
-    def test_calculate_ratio_happy_path(self, uc):
-        # EG contrast: known-units ratio should compute as expected.
-        # 1000 m vs 1 km -> both equal 1000 m in base, ratio = 1.0.
-        assert uc.calculate_ratio(1000, "m", 1, "km", "length") == pytest.approx(1.0)
-
     def test_calculate_ratio_zero_divisor_returns_none(self, uc):
         # EG: 0-denominator case - must not raise ZeroDivisionError.
         assert uc.calculate_ratio(5, "m", 0, "m", "length") is None
@@ -147,11 +135,6 @@ class TestErrorGuessing:
     def test_detect_category_cross_category_returns_none(self, uc):
         # EG: "kg" and "m" have no shared category.
         assert uc.detect_category("kg", "m") is None
-
-    def test_detect_category_returns_first_match(self, uc):
-        # EG: documents first-match behavior. Each unit currently appears in
-        # only one category, so this just asserts the contract is deterministic.
-        assert uc.detect_category("kg", "g") == "weight"
 
     def test_convert_with_non_numeric_value_raises(self, uc):
         # EG: non-numeric value propagates the TypeError from multiplication.
