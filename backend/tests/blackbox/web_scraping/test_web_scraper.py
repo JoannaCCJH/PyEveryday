@@ -102,6 +102,19 @@ class TestScrapeLinksEP:
         with patch.object(ws.session, "get", side_effect=requests.ConnectionError()):
             assert ws.scrape_links("https://x.example.com") == []
 
+    def test_relative_href_kept_when_absolute_false(self, ws):
+        with patch.object(ws.session, "get", return_value=_response(LINKS_HTML)):
+            links = ws.scrape_links("https://base.example.com/", absolute=False)
+        urls = [l["url"] for l in links]
+        assert "/local/page" in urls
+
+    def test_link_text_extracted(self, ws):
+        with patch.object(ws.session, "get", return_value=_response(LINKS_HTML)):
+            links = ws.scrape_links("https://base.example.com/")
+        texts = [l["text"] for l in links]
+        assert "External link" in texts
+        assert "Local link" in texts
+
 
 class TestScrapeImagesEP:
     # Tests collects images with src or data src.
@@ -149,6 +162,12 @@ class TestScrapeFormsEP:
         email_field = next(x for x in f["fields"] if x["name"] == "email")
         assert email_field["required"] is True
 
+    def test_select_field_options_extracted(self, ws):
+        with patch.object(ws.session, "get", return_value=_response(FORMS_HTML)):
+            forms = ws.scrape_forms("https://x.example.com")
+        country = next(f for f in forms[0]["fields"] if f["name"] == "country")
+        assert country["options"] == ["US", "UK"]
+
 
 class TestMetadataEP:
     # Tests metadata extracts all documented fields.
@@ -161,6 +180,30 @@ class TestMetadataEP:
         assert meta["author"] == "Alice"
         assert meta["canonical_url"] == "https://canonical.example.com/"
         assert meta["lang"] == "en"
+
+    def test_title_default_when_missing(self, ws):
+        html = "<html><head></head><body></body></html>"
+        with patch.object(ws.session, "get", return_value=_response(html)):
+            meta = ws.get_page_metadata("https://x.example.com")
+        assert meta["title"] == ""
+
+    def test_lang_default_when_attr_missing(self, ws):
+        html = "<html><head></head></html>"
+        with patch.object(ws.session, "get", return_value=_response(html)):
+            meta = ws.get_page_metadata("https://x.example.com")
+        assert meta["lang"] == ""
+
+    def test_lang_default_when_no_html_tag(self, ws):
+        html = "<title>x</title>"
+        with patch.object(ws.session, "get", return_value=_response(html)):
+            meta = ws.get_page_metadata("https://x.example.com")
+        assert meta["lang"] == ""
+
+    def test_og_description_used_when_name_missing(self, ws):
+        html = '<html><head><meta property="og:description" content="OG desc"></head></html>'
+        with patch.object(ws.session, "get", return_value=_response(html)):
+            meta = ws.get_page_metadata("https://x.example.com")
+        assert meta["description"] == "OG desc"
 
 
 class TestBoundaries:
@@ -215,3 +258,13 @@ class TestErrorGuessing:
     # Tests session user agent is set.
     def test_session_user_agent_is_set(self, ws):
         assert "Mozilla" in ws.session.headers.get("User-Agent", "")
+
+    def test_save_data_csv_with_empty_list_writes_no_file(self, ws, tmp_path):
+        f = tmp_path / "empty.csv"
+        ws.save_data([], str(f), format="csv")
+        assert not f.exists()
+
+    def test_save_data_csv_with_non_list_writes_no_file(self, ws, tmp_path):
+        f = tmp_path / "out.csv"
+        ws.save_data("not_a_list", str(f), format="csv")
+        assert not f.exists()
