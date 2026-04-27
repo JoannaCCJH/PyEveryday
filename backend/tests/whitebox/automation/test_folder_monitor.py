@@ -1,14 +1,9 @@
-"""Targeted whitebox coverage for ``scripts/automation/folder_monitor.py``.
-
-Slim — covers the ``FolderMonitor`` event handler methods and
-``execute_action`` directly (the CLI tests can't easily produce real
-filesystem events).
-"""
-
 from __future__ import annotations
 
 import subprocess
+
 from types import SimpleNamespace
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -16,6 +11,7 @@ import pytest
 from scripts.automation import folder_monitor as fm
 
 
+# Defines the evt helper.
 def _evt(src, dest=None, is_directory=False):
     e = SimpleNamespace(src_path=src, is_directory=is_directory)
     if dest is not None:
@@ -24,6 +20,7 @@ def _evt(src, dest=None, is_directory=False):
 
 
 class TestEventCallbacks:
+    # Tests file event invokes action.
     def test_file_event_invokes_action(self):
         handler = fm.FolderMonitor(action_script="action.py")
         with patch.object(handler, "execute_action") as ea:
@@ -32,12 +29,14 @@ class TestEventCallbacks:
             handler.on_deleted(_evt("/tmp/z.txt"))
         assert ea.call_count == 3
 
+    # Tests on moved uses dest path.
     def test_on_moved_uses_dest_path(self):
         handler = fm.FolderMonitor(action_script="action.py")
         with patch.object(handler, "execute_action") as ea:
             handler.on_moved(_evt("/tmp/old.txt", dest="/tmp/new.txt"))
         ea.assert_called_once_with("/tmp/new.txt", "moved")
 
+    # Tests directory event is ignored.
     def test_directory_event_is_ignored(self):
         handler = fm.FolderMonitor(action_script="action.py")
         with patch.object(handler, "execute_action") as ea:
@@ -46,6 +45,7 @@ class TestEventCallbacks:
 
 
 class TestExecuteAction:
+    # Tests calledprocesserror branch.
     def test_calledprocesserror_branch(self, capsys):
         handler = fm.FolderMonitor(action_script="action.py")
         with patch.object(fm.subprocess, "run",
@@ -55,10 +55,13 @@ class TestExecuteAction:
 
 
 class TestMonitorFolder:
+    # Tests normal path starts and joins observer.
     def test_normal_path_starts_and_joins_observer(self, tmp_path):
         observer = MagicMock()
-        with patch.object(fm, "Observer", return_value=observer), \
-             patch.object(fm.time, "sleep", side_effect=KeyboardInterrupt):
+        with (
+            patch.object(fm, "Observer", return_value=observer),
+            patch.object(fm.time, "sleep", side_effect=KeyboardInterrupt),
+        ):
             fm.monitor_folder(str(tmp_path))
         observer.schedule.assert_called_once()
         observer.start.assert_called_once()

@@ -1,13 +1,7 @@
-"""Targeted whitebox coverage for ``scripts/automation/auto_email_sender.py``.
-
-Slim — direct tests for ``EmailSender.send_email`` (success + failure)
-and ``send_bulk_emails``.  CLI smoke test only hits the failure arm; we
-add the success arm here so the bulk loop body is covered too.
-"""
-
 from __future__ import annotations
 
 import json
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,6 +9,7 @@ import pytest
 from scripts.automation.auto_email_sender import EmailSender
 
 
+# Provides the cfg fixture.
 @pytest.fixture
 def cfg(tmp_path):
     p = tmp_path / "email_config.json"
@@ -28,6 +23,7 @@ def cfg(tmp_path):
 
 
 class TestSendEmail:
+    # Tests success no attachments.
     def test_success_no_attachments(self, cfg):
         sender = EmailSender(str(cfg))
         smtp_instance = MagicMock()
@@ -41,6 +37,7 @@ class TestSendEmail:
 
 
 class TestSendBulkEmails:
+    # Tests counts only successful.
     def test_counts_only_successful(self, cfg, capsys):
         sender = EmailSender(str(cfg))
         with patch.object(EmailSender, "send_email", side_effect=[True, False, True]):

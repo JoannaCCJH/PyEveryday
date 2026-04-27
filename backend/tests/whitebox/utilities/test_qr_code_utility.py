@@ -1,9 +1,3 @@
-"""Targeted whitebox coverage for ``scripts/utilities/QR_code_utility.py``.
-
-Slim — direct tests for ``generate_qr`` and ``scan_qr`` so the method
-bodies are covered (CLI tests run with no real input image).
-"""
-
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -13,12 +7,14 @@ import pytest
 from scripts.utilities import QR_code_utility as qrutil
 
 
+# Provides the tool fixture.
 @pytest.fixture
 def tool():
     return qrutil.QR_Toolkit()
 
 
 class TestGenerateQr:
+    # Tests success calls save.
     def test_success_calls_save(self, tool, tmp_path):
         fake_img = MagicMock()
         with patch.object(qrutil, "qr") as q:
@@ -29,6 +25,7 @@ class TestGenerateQr:
 
 
 class TestScanQr:
+    # Tests decoded branch.
     def test_decoded_branch(self, tool, tmp_path, capsys):
         p = tmp_path / "x.png"
         p.write_bytes(b"\x00")
@@ -41,6 +38,7 @@ class TestScanQr:
         assert out == "payload"
         assert "Decoded QR Data: payload" in capsys.readouterr().out
 
+    # Tests missing file short circuits.
     def test_missing_file_short_circuits(self, tool, tmp_path, capsys):
         out = tool.scan_qr(str(tmp_path / "missing.png"))
         assert out is None

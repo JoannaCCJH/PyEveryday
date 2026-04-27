@@ -1,15 +1,11 @@
-"""Targeted whitebox coverage for ``scripts/automation/backup_scheduler.py``.
-
-Slim — covers ``backup_directory``, ``backup_and_compress``, and
-``cleanup_old_backups`` directly because the CLI ``manual`` path mostly
-just dispatches to ``scheduled_backup``.
-"""
-
 from __future__ import annotations
 
 import os
+
 import time
+
 import zipfile
+
 from unittest.mock import patch
 
 import pytest
@@ -17,17 +13,20 @@ import pytest
 from scripts.automation import backup_scheduler as bs
 
 
+# Defines the mkfile helper.
 def _mkfile(path, content="x"):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content)
 
 
 class TestBackupDirectory:
+    # Tests missing source.
     def test_missing_source(self, tmp_path, capsys):
         result = bs.backup_directory(str(tmp_path / "nope"), str(tmp_path / "out"))
         assert result is False
         assert "does not exist" in capsys.readouterr().out
 
+    # Tests creates backup dir and copies.
     def test_creates_backup_dir_and_copies(self, tmp_path):
         src = tmp_path / "src"
         _mkfile(src / "f.txt", "hello")
@@ -38,6 +37,7 @@ class TestBackupDirectory:
 
 
 class TestBackupAndCompress:
+    # Tests zip contains walked files.
     def test_zip_contains_walked_files(self, tmp_path):
         src = tmp_path / "src"
         _mkfile(src / "a.txt", "A")
@@ -53,6 +53,7 @@ class TestBackupAndCompress:
 
 
 class TestCleanupOldBackups:
+    # Tests keeps recent removes old file.
     def test_keeps_recent_removes_old_file(self, tmp_path):
         d = tmp_path / "backups"
         d.mkdir()

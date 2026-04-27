@@ -1,10 +1,3 @@
-"""Whitebox coverage for ``scripts/utilities/unit_converter.py``.
-
-Trimmed to the essential branches not exercised by the CLI smoke tests.
-Most surfaces are already driven through ``test_cli_main.TestUnitConverterCLI``;
-here we focus on direct method behavior + return-value assertions.
-"""
-
 from __future__ import annotations
 
 import pytest
@@ -12,12 +5,14 @@ import pytest
 from scripts.utilities.unit_converter import UnitConverter
 
 
+# Provides the uc fixture.
 @pytest.fixture
 def uc():
     return UnitConverter()
 
 
 class TestTemperature:
+    # Tests conversion branches.
     @pytest.mark.parametrize("v,frm,to,expected", [
         (0, "celsius", "fahrenheit", 32.0),
         (491.67, "rankine", "celsius", 0.0),
@@ -27,14 +22,17 @@ class TestTemperature:
 
 
 class TestStandard:
+    # Tests known unit.
     def test_known_unit(self, uc):
         assert uc.convert_standard(1000, "m", "km", "length") == pytest.approx(1.0)
 
+    # Tests unknown unit returns none.
     def test_unknown_unit_returns_none(self, uc):
         assert uc.convert_standard(1, "flarg", "m", "length") is None
 
 
 class TestConvert:
+    # Tests auto detect and unknown.
     def test_auto_detect_and_unknown(self, uc):
         assert uc.convert(1, "m", "km") == pytest.approx(0.001)
         assert uc.convert(1, "flarg", "quuz") is None
