@@ -1,0 +1,23 @@
+<html><body><h1>backend/scripts/automation/backup_scheduler.py</h1>Killed 10 out of 64 mutants<h2>Survived</h2>Survived mutation testing. These mutants show holes in your test suite.<h3>Mutant 65</h3><pre>--- backend/scripts/automation/backup_scheduler.py
++++ backend/scripts/automation/backup_scheduler.py
+@@ -59,7 +59,7 @@
+     
+     for item in os.listdir(backup_dir):
+         item_path = os.path.join(backup_dir, item)
+-        if os.path.getmtime(item_path) < cutoff_time:
++        if os.path.getmtime(item_path) <= cutoff_time:
+             try:
+                 if os.path.isdir(item_path):
+                     shutil.rmtree(item_path)
+</pre><h3>Mutant 67</h3><pre>--- backend/scripts/automation/backup_scheduler.py
++++ backend/scripts/automation/backup_scheduler.py
+@@ -69,7 +69,7 @@
+             except Exception as e:
+                 print(f"Error removing {item}: {e}")
+ 
+-def scheduled_backup(source_dir, backup_dir, compress=True):
++def scheduled_backup(source_dir, backup_dir, compress=False):
+     print(f"Starting scheduled backup at {datetime.datetime.now()}")
+     
+     if compress:
+</pre></body></html>

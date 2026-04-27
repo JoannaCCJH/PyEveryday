@@ -1,0 +1,23 @@
+To apply a mutant on disk:
+    mutmut apply <id>
+
+To show a mutant:
+    mutmut show <id>
+
+
+Timed out ⏰ (1)
+
+---- backend/scripts/automation/folder_monitor.py (1) ----
+
+108
+
+Survived 🙁 (6)
+
+---- backend/scripts/automation/backup_scheduler.py (2) ----
+
+65, 67
+
+---- backend/scripts/automation/folder_monitor.py (4) ----
+
+104-106, 112
+
