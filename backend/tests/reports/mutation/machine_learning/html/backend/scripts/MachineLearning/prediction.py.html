@@ -1,1 +1,12 @@
-<html><body><h1>backend/scripts/MachineLearning/prediction.py</h1>Killed 76 out of 120 mutants<h2>Survived</h2>Survived mutation testing. These mutants show holes in your test suite.
+<html><body><h1>backend/scripts/MachineLearning/prediction.py</h1>Killed 6 out of 122 mutants<h2>Survived</h2>Survived mutation testing. These mutants show holes in your test suite.<h3>Mutant 66</h3><pre>--- backend/scripts/MachineLearning/prediction.py
++++ backend/scripts/MachineLearning/prediction.py
+@@ -110,7 +110,7 @@
+ 
+ 
+     def forecast(self, days=30):
+-        if self.model is None or self.df is None:
++        if self.model is None and self.df is None:
+             raise RuntimeError("Model not trained")
+         last_t = self.df["t"].max()
+         future_dates = [self.df["date"].max() + timedelta(days=i) for i in range(1, days + 1)]
+</pre></body></html>
