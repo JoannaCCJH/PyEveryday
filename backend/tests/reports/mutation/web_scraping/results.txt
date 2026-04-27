@@ -1,0 +1,30 @@
+To apply a mutant on disk:
+    mutmut apply <id>
+
+To show a mutant:
+    mutmut show <id>
+
+
+Survived 🙁 (6)
+
+---- backend/scripts/web_scraping/web_scraper.py (6) ----
+
+5-6, 8, 15, 29-30
+
+Untested/skipped (1177)
+
+---- backend/scripts/web_scraping/news_fetcher.py (197) ----
+
+736-932
+
+---- backend/scripts/web_scraping/weather_checker.py (277) ----
+
+933-1209
+
+---- backend/scripts/web_scraping/web_scraper.py (351) ----
+
+33-383
+
+---- backend/scripts/web_scraping/youtube_downloader.py (352) ----
+
+384-735
