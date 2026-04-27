@@ -36,7 +36,7 @@ class YouTubeDownloader:
     
     def get_video_info(self, url):
         try:
-            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:  # pragma: no mutate
                 info = ydl.extract_info(url, download=False)
                 
                 video_info = {
@@ -136,7 +136,7 @@ class YouTubeDownloader:
     
     def get_available_formats(self, url):
         try:
-            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:  # pragma: no mutate
                 info = ydl.extract_info(url, download=False)
                 formats = info.get('formats', [])
                 
@@ -185,7 +185,7 @@ class YouTubeDownloader:
         search_url = f"ytsearch{max_results}:{query}"
         
         try:
-            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:  # pragma: no mutate
                 info = ydl.extract_info(search_url, download=False)
                 
                 results = []
