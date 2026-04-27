@@ -87,6 +87,14 @@ class TestDocxToPdfEP:
         assert "--convert-to" in args
         assert "pdf" in args
 
+    def test_linux_explicit_output_path_passed_to_subprocess(self, conv, tmp_path, monkeypatch):
+        monkeypatch.setattr(conv, "system", "Linux")
+        with patch("scripts.utilities.pdf_converter.subprocess.run") as mock_run:
+            conv.docx_to_pdf("/some/elsewhere/in.docx", str(tmp_path))
+        args = mock_run.call_args.args[0]
+        assert str(tmp_path) in args
+        assert "/some/elsewhere" not in args
+
 
 class TestBoundaries:
     # Tests images to pdf empty list produces empty pdf.

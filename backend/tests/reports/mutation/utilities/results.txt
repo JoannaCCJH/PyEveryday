@@ -1,0 +1,17 @@
+To apply a mutant on disk:
+    mutmut apply <id>
+
+To show a mutant:
+    mutmut show <id>
+
+
+Survived 🙁 (18)
+
+---- backend/scripts/utilities/pdf_converter.py (1) ----
+
+1328
+
+---- backend/scripts/utilities/unit_converter.py (17) ----
+
+1138-1144, 1169-1175, 1201, 1204-1205
+

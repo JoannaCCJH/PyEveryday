@@ -1,0 +1,13 @@
+To apply a mutant on disk:
+    mutmut apply <id>
+
+To show a mutant:
+    mutmut show <id>
+
+
+Survived 🙁 (1)
+
+---- backend/scripts/MachineLearning/prediction.py (1) ----
+
+66
+

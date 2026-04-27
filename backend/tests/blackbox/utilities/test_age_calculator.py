@@ -121,3 +121,62 @@ class TestErrorGuessing:
     def test_parse_date_empty_string_raises(self, ac):
         with pytest.raises(ValueError):
             ac.parse_date("")
+
+
+class TestCalculateAgeBoundariesBA:
+    def test_birthday_today_has_zero_days_to_next_birthday(self, ac):
+        result = ac.calculate_age("2000-06-15", "2020-06-15")
+        assert result['days_to_next_birthday'] == 0
+
+    def test_total_months_at_same_day_of_month_no_decrement(self, ac):
+        result = ac.calculate_age("2000-01-15", "2020-01-15")
+        assert result['months'] == 240
+
+
+class TestGetDetailedAgeBA:
+    def test_uses_explicit_current_date_not_today(self, ac):
+        result = ac.get_detailed_age("2000-06-15", "2020-06-15")
+        assert result == {'years': 20, 'months': 0, 'days': 0}
+
+    def test_same_day_of_month_no_borrow_into_months(self, ac):
+        result = ac.get_detailed_age("2000-06-15", "2001-06-15")
+        assert result == {'years': 1, 'months': 0, 'days': 0}
+
+    def test_same_month_no_borrow_into_years(self, ac):
+        result = ac.get_detailed_age("2000-06-15", "2010-06-15")
+        assert result['years'] == 10
+        assert result['months'] == 0
+
+
+class TestLifeEventsBA:
+    def test_milestone_falling_exactly_today_counts_as_passed(self, ac):
+        today = datetime.date.today()
+        try:
+            birth = datetime.date(today.year - 18, today.month, today.day)
+        except ValueError:
+            birth = datetime.date(today.year - 18, today.month, today.day - 1)
+        events = ac.calculate_life_events(birth)
+        age_18 = next(e for e in events if e['age'] == 18)
+        assert age_18['status'] == 'passed'
+
+
+class TestDisplayLifeEventsEG:
+    def test_display_shows_both_passed_and_upcoming_sections(self, ac, capsys):
+        today = datetime.date.today()
+        try:
+            birth = datetime.date(today.year - 30, today.month, today.day)
+        except ValueError:
+            birth = datetime.date(today.year - 30, today.month, today.day - 1)
+        ac.display_life_events(birth)
+        out = capsys.readouterr().out
+        assert "Milestones Reached:" in out
+        assert "Upcoming Milestones:" in out
+        assert "Legal adult" in out
+        assert "Forty" in out
+
+
+class TestCompareAgesEG:
+    def test_compare_ages_same_birth_picks_person2_as_older(self, ac, capsys):
+        ac.compare_ages("2000-06-15", "2000-06-15", "Alice", "Bob")
+        out = capsys.readouterr().out
+        assert "Older person: Bob" in out

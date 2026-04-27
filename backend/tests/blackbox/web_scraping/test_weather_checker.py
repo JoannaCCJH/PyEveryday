@@ -136,6 +136,7 @@ class TestErrorGuessing:
         with patch("requests.get", return_value=_ok_response(OPENWEATHER_OK_JSON)):
             result = checker.get_weather_by_city("London", units="metric")
         assert "\u00b0C" in result["temperature"]
+        assert result["wind_speed"].endswith("m/s")
 
     # Tests imperial units temp unit fahrenheit.
     def test_imperial_units_temp_unit_fahrenheit(self):
@@ -186,3 +187,31 @@ class TestErrorGuessing:
         checker.display_weather(None)
         out = capsys.readouterr().out
         assert "No weather data" in out
+
+    def test_forecast_metric_temperature_uses_celsius(self):
+        checker = WeatherChecker(api_key="abc")
+        payload = {
+            "city": {"name": "X"},
+            "list": [{
+                "dt": 1_700_000_000,
+                "main": {"temp": 5.0, "humidity": 50},
+                "weather": [{"description": "ok"}],
+            }],
+        }
+        with patch("requests.get", return_value=_ok_response(payload)):
+            result = checker.get_weather_forecast("X", days=1, units="metric")
+        assert result["forecast"][0]["temperature"].endswith("°C")
+
+    def test_forecast_imperial_temperature_uses_fahrenheit(self):
+        checker = WeatherChecker(api_key="abc")
+        payload = {
+            "city": {"name": "X"},
+            "list": [{
+                "dt": 1_700_000_000,
+                "main": {"temp": 70.0, "humidity": 50},
+                "weather": [{"description": "ok"}],
+            }],
+        }
+        with patch("requests.get", return_value=_ok_response(payload)):
+            result = checker.get_weather_forecast("X", days=1, units="imperial")
+        assert result["forecast"][0]["temperature"].endswith("°F")

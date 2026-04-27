@@ -92,6 +92,26 @@ class TestBoundaries:
         assert out.exists()
 
 
+# =========================================================================
+# EG â Error Guessing
+# =========================================================================
+
+class TestScanQrBA:
+    def test_scan_with_points_none_treats_as_no_qr(self, qr, tmp_path, monkeypatch, capsys):
+        img_path = tmp_path / "img.png"
+        img_path.write_bytes(b"fake")
+
+        fake_cv2 = MagicMock()
+        fake_cv2.imread.return_value = MagicMock()
+        detector = MagicMock()
+        detector.detectAndDecode.return_value = ("ghost data", None, None)
+        fake_cv2.QRCodeDetector.return_value = detector
+        monkeypatch.setattr("scripts.utilities.QR_code_utility.cv2", fake_cv2)
+
+        assert qr.scan_qr(str(img_path)) is None
+        assert "No QR code found" in capsys.readouterr().out
+
+
 class TestErrorGuessing:
     # Tests scan exception in cv2 is swallowed.
     def test_scan_exception_in_cv2_is_swallowed(self, qr, tmp_path, monkeypatch, capsys):

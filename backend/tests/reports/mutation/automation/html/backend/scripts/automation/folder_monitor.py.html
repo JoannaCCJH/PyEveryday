@@ -1,0 +1,56 @@
+<html><body><h1>backend/scripts/automation/folder_monitor.py</h1>Killed 5 out of 48 mutants<h2>Timeouts</h2>Mutants that made the test suite take a lot longer so the tests were killed.<h3>Mutant 108</h3><pre>--- backend/scripts/automation/folder_monitor.py
++++ backend/scripts/automation/folder_monitor.py
+@@ -41,7 +41,7 @@
+             print(f"Error executing action script: {e}")
+ 
+ def monitor_folder(folder_path, action_script=None):
+-    if not os.path.exists(folder_path):
++    if  os.path.exists(folder_path):
+         print(f"Folder {folder_path} does not exist")
+         return
+     
+</pre><h2>Survived</h2>Survived mutation testing. These mutants show holes in your test suite.<h3>Mutant 104</h3><pre>--- backend/scripts/automation/folder_monitor.py
++++ backend/scripts/automation/folder_monitor.py
+@@ -36,7 +36,7 @@
+     def execute_action(self, file_path, action):
+         try:
+             subprocess.run([sys.executable, self.action_script, file_path, action], 
+-                         check=True, capture_output=True, text=True)
++                         check=False, capture_output=True, text=True)
+         except subprocess.CalledProcessError as e:
+             print(f"Error executing action script: {e}")
+ 
+</pre><h3>Mutant 105</h3><pre>--- backend/scripts/automation/folder_monitor.py
++++ backend/scripts/automation/folder_monitor.py
+@@ -36,7 +36,7 @@
+     def execute_action(self, file_path, action):
+         try:
+             subprocess.run([sys.executable, self.action_script, file_path, action], 
+-                         check=True, capture_output=True, text=True)
++                         check=True, capture_output=False, text=True)
+         except subprocess.CalledProcessError as e:
+             print(f"Error executing action script: {e}")
+ 
+</pre><h3>Mutant 106</h3><pre>--- backend/scripts/automation/folder_monitor.py
++++ backend/scripts/automation/folder_monitor.py
+@@ -36,7 +36,7 @@
+     def execute_action(self, file_path, action):
+         try:
+             subprocess.run([sys.executable, self.action_script, file_path, action], 
+-                         check=True, capture_output=True, text=True)
++                         check=True, capture_output=True, text=False)
+         except subprocess.CalledProcessError as e:
+             print(f"Error executing action script: {e}")
+ 
+</pre><h3>Mutant 112</h3><pre>--- backend/scripts/automation/folder_monitor.py
++++ backend/scripts/automation/folder_monitor.py
+@@ -47,7 +47,7 @@
+     
+     event_handler = FolderMonitor(action_script)
+     observer = Observer()
+-    observer.schedule(event_handler, folder_path, recursive=True)
++    observer.schedule(event_handler, folder_path, recursive=False)
+     
+     observer.start()
+     print(f"Monitoring folder: {folder_path}")
+</pre></body></html>
