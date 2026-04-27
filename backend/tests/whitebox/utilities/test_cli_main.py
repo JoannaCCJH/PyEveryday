@@ -1,26 +1,16 @@
-"""CLI smoke tests for utility scripts via ``runpy``.
-
-Drives the ``if __name__ == "__main__":`` blocks of each utility script with
-patched ``sys.argv``, ``builtins.input`` and (where needed) ``requests`` so
-coverage records the CLI dispatch branches without touching the network or
-the user's real filesystem.
-"""
-
 from __future__ import annotations
 
 import runpy
+
 import sys
+
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 
+# Defines the run helper.
 def _run(module_name, argv, **patches):
-    """Execute ``module_name`` as ``__main__`` with ``sys.argv = argv``.
-
-    SystemExit is swallowed because most CLI scripts call ``sys.exit(1)`` for
-    usage errors. Active patches are layered via ``unittest.mock.patch``.
-    """
     ctxs = [patch.object(sys, "argv", list(argv))]
     for target, value in patches.items():
         ctxs.append(patch(target, value))
@@ -36,41 +26,35 @@ def _run(module_name, argv, **patches):
             c.__exit__(None, None, None)
 
 
+# Provides the isolate_cwd fixture.
 @pytest.fixture(autouse=True)
 def _isolate_cwd(tmp_path, monkeypatch):
-    """Each CLI test runs in its own temp directory to keep file IO local."""
     monkeypatch.chdir(tmp_path)
-
-
-# --------------------------- unit_converter ---------------------------------
-
 UC = "scripts.utilities.unit_converter"
 
 
 class TestUnitConverterCLI:
+    # Tests dispatch.
     @pytest.mark.parametrize("argv", [
-        [UC],                                   # usage path
+        [UC],
         [UC, "convert", "1", "m", "km"],
         [UC, "convert", "1", "m", "km", "length"],
-        [UC, "convert", "bad", "m", "km"],     # ValueError path
+        [UC, "convert", "bad", "m", "km"],
         [UC, "multiple", "1", "m", "length"],
         [UC, "smart", "1500", "m"],
         [UC, "categories"],
         [UC, "units", "length"],
         [UC, "ratio", "1", "m", "2", "m", "length"],
-        [UC, "wat"],                            # unknown command
+        [UC, "wat"],
     ])
     def test_dispatch(self, argv, capsys):
         _run(UC, argv)
         capsys.readouterr()
-
-
-# --------------------------- password_generator -----------------------------
-
 PG = "scripts.utilities.password_generator"
 
 
 class TestPasswordGeneratorCLI:
+    # Tests dispatch.
     @pytest.mark.parametrize("argv", [
         [PG],
         [PG, "random", "12"],
@@ -86,22 +70,20 @@ class TestPasswordGeneratorCLI:
         _run(PG, argv, **{"builtins.input": lambda *a, **kw: "n"})
         capsys.readouterr()
 
+    # Tests multiple with save no.
     def test_multiple_with_save_no(self, capsys):
         _run(PG, [PG, "multiple", "2", "10"],
              **{"builtins.input": lambda *a, **kw: "n"})
         capsys.readouterr()
-
-
-# --------------------------- age_calculator ---------------------------------
-
 AC = "scripts.utilities.age_calculator"
 
 
 class TestAgeCalculatorCLI:
+    # Tests dispatch.
     @pytest.mark.parametrize("argv", [
         [AC],
-        [AC, "age"],                                # short usage
-        [AC, "age", "1990-01-01", "2025-01-01"],    # hits known SUT bug, swallowed
+        [AC, "age"],
+        [AC, "age", "1990-01-01", "2025-01-01"],
         [AC, "milestones", "1990-01-01"],
         [AC, "compare", "1990-01-01", "1995-06-15", "Alice", "Bob"],
         [AC, "zodiac", "1990-01-01"],
@@ -110,13 +92,10 @@ class TestAgeCalculatorCLI:
     def test_dispatch(self, argv, capsys):
         _run(AC, argv)
         capsys.readouterr()
-
-
-# --------------------------- currency_converter -----------------------------
-
 CC = "scripts.utilities.currency_converter"
 
 
+# Defines the fake_rates_response helper.
 def _fake_rates_response():
     r = MagicMock()
     r.status_code = 200
@@ -126,10 +105,11 @@ def _fake_rates_response():
 
 
 class TestCurrencyConverterCLI:
+    # Tests dispatch.
     @pytest.mark.parametrize("argv", [
         [CC],
         [CC, "convert", "100", "USD", "EUR"],
-        [CC, "convert", "bad", "USD", "EUR"],          # ValueError branch
+        [CC, "convert", "bad", "USD", "EUR"],
         [CC, "compare", "100", "USD", "EUR,GBP,JPY"],
         [CC, "list"],
         [CC, "info", "USD"],
@@ -141,36 +121,30 @@ class TestCurrencyConverterCLI:
              **{"scripts.utilities.currency_converter.requests.get":
                 MagicMock(return_value=_fake_rates_response())})
         capsys.readouterr()
-
-
-# --------------------------- pdf_converter ----------------------------------
-
 PD = "scripts.utilities.pdf_converter"
 
 
 class TestPDFConverterCLI:
+    # Tests usage dispatch.
     @pytest.mark.parametrize("argv", [
         [PD],
-        [PD, "docx2pdf"],          # short usage
-        [PD, "img2pdf"],           # short usage
-        [PD, "merge"],             # short usage
+        [PD, "docx2pdf"],
+        [PD, "img2pdf"],
+        [PD, "merge"],
         [PD, "wat"],
     ])
     def test_usage_dispatch(self, argv, capsys):
         _run(PD, argv)
         capsys.readouterr()
-
-
-# --------------------------- QR_code_utility --------------------------------
-
 QR = "scripts.utilities.QR_code_utility"
 
 
 class TestQRCodeCLI:
+    # Tests usage dispatch.
     @pytest.mark.parametrize("argv", [
         [QR],
-        [QR, "generate"],                                    # short usage
-        [QR, "scan"],                                        # short usage
+        [QR, "generate"],
+        [QR, "scan"],
         [QR, "help"],
         [QR, "wat"],
     ])
@@ -178,17 +152,15 @@ class TestQRCodeCLI:
         _run(QR, argv)
         capsys.readouterr()
 
+    # Tests generate writes file.
     def test_generate_writes_file(self, tmp_path, capsys):
         _run(QR, [QR, "generate", "hello", str(tmp_path / "x.png")])
         capsys.readouterr()
-
-
-# --------------------------- compress_clipboard -----------------------------
-
 CB = "scripts.utilities.compress_clipboard"
 
 
 class TestCompressClipboardCLI:
+    # Tests usage dispatch.
     @pytest.mark.parametrize("argv", [
         [CB],
         [CB, "compress"],
@@ -201,6 +173,7 @@ class TestCompressClipboardCLI:
                 MagicMock(return_value=None)})
         capsys.readouterr()
 
+    # Tests copy text.
     def test_copy_text(self, capsys):
         _run(CB, [CB, "copy", "hello", "world"],
              **{"scripts.utilities.compress_clipboard.pyperclip.copy":

@@ -1,13 +1,7 @@
-"""Targeted whitebox coverage for ``scripts/utilities/compress_clipboard.py``.
-
-Slim — three direct tests for ``FileUtility.compress_files`` because the
-CLI smoke tests only hit the usage / dispatch arms (no real files), so
-the body of ``compress_files`` is otherwise untested.
-"""
-
 from __future__ import annotations
 
 import zipfile
+
 from unittest.mock import patch
 
 import pytest
@@ -15,6 +9,7 @@ import pytest
 from scripts.utilities import compress_clipboard as cc
 
 
+# Provides the no_sleep fixture.
 @pytest.fixture(autouse=True)
 def _no_sleep():
     with patch.object(cc.time, "sleep"):
@@ -22,11 +17,13 @@ def _no_sleep():
 
 
 class TestCompressFiles:
+    # Tests all invalid raises.
     def test_all_invalid_raises(self, tmp_path):
         with pytest.raises(FileNotFoundError):
             cc.FileUtility.compress_files([str(tmp_path / "nope1"),
                                            str(tmp_path / "nope2")])
 
+    # Tests explicit output zip with file.
     def test_explicit_output_zip_with_file(self, tmp_path):
         f = tmp_path / "doc.txt"
         f.write_text("hi")
@@ -35,6 +32,7 @@ class TestCompressFiles:
         assert result == str(out)
         assert out.exists()
 
+    # Tests directory walk branch.
     def test_directory_walk_branch(self, tmp_path):
         d = tmp_path / "src"
         d.mkdir()

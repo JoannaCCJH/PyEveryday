@@ -1,13 +1,7 @@
-"""Whitebox coverage for ``scripts/web_scraping/youtube_downloader.py``.
-
-Slimmed: CLI tests already drive every command via ``runpy``.  Here we
-keep direct-method assertions for the ones whose return value matters
-(success/failure booleans, format separation, duration formatting).
-"""
-
 from __future__ import annotations
 
 from contextlib import contextmanager
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,6 +9,7 @@ import pytest
 from scripts.web_scraping import youtube_downloader as yd
 
 
+# Defines the mock_ydl helper.
 @contextmanager
 def _mock_ydl(extract_info=None, raise_on_init=None):
     ydl_instance = MagicMock()
@@ -31,6 +26,7 @@ def _mock_ydl(extract_info=None, raise_on_init=None):
 
 
 class TestDownloadVideo:
+    # Tests success and failure.
     def test_success_and_failure(self, tmp_path, capsys):
         downloader = yd.YouTubeDownloader(str(tmp_path / "d"))
         with _mock_ydl(extract_info={}):
@@ -41,6 +37,7 @@ class TestDownloadVideo:
 
 
 class TestGetAvailableFormats:
+    # Tests separates video and audio.
     def test_separates_video_and_audio(self, tmp_path):
         info = {"formats": [
             {"format_id": "a", "ext": "mp4", "vcodec": "h264", "acodec": "aac"},
@@ -55,6 +52,7 @@ class TestGetAvailableFormats:
 
 
 class TestFormatDuration:
+    # Tests branches.
     @pytest.mark.parametrize("sec,expected", [
         (3661, "01:01:01"),
         (0, "Unknown"),

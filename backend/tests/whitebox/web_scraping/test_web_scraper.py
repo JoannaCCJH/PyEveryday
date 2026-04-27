@@ -1,21 +1,15 @@
-"""Whitebox coverage for ``scripts/web_scraping/web_scraper.py``.
-
-Slimmed: CLI tests already drive the scrape_* commands.  We keep the
-return-value assertions for ``get_page`` (success/failure), ``scrape_text``
-with a custom selector dict, and the ``scrape_forms`` shape because the
-form output keys are not visible from ``stdout`` alone.
-"""
-
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 import requests
 
 from scripts.web_scraping.web_scraper import WebScraper
 
 
+# Defines the resp helper.
 def _resp(content=b""):
     r = MagicMock()
     r.content = content
@@ -23,16 +17,19 @@ def _resp(content=b""):
     return r
 
 
+# Provides the s fixture.
 @pytest.fixture
 def s():
     return WebScraper(delay=0)
 
 
 class TestGetPage:
+    # Tests success.
     def test_success(self, s):
         with patch.object(s.session, "get", return_value=_resp(b"x")):
             assert s.get_page("https://x").content == b"x"
 
+    # Tests request exception returns none.
     def test_request_exception_returns_none(self, s, capsys):
         with patch.object(s.session, "get",
                           side_effect=requests.exceptions.RequestException("boom")):
@@ -41,6 +38,7 @@ class TestGetPage:
 
 
 class TestScrapeText:
+    # Tests with selectors.
     def test_with_selectors(self, s):
         html = b"<html><body><h1>A</h1><h1>B</h1></body></html>"
         with patch.object(s, "get_page", return_value=_resp(html)):
@@ -49,6 +47,7 @@ class TestScrapeText:
 
 
 class TestScrapeForms:
+    # Tests scrape forms.
     def test_scrape_forms(self, s):
         html = b"""<form action='/submit' method='post'>
             <input type='text' name='q'/>
