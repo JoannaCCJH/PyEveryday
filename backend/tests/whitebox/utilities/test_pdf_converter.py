@@ -1,13 +1,7 @@
-"""Targeted whitebox coverage for ``scripts/utilities/pdf_converter.py``.
-
-Slim — direct tests for the three public methods.  CLI smoke tests only
-hit usage paths because real conversion needs valid input files; here we
-mock the heavy third-party libraries to keep the test fast and offline.
-"""
-
 from __future__ import annotations
 
 import sys
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,12 +9,14 @@ import pytest
 from scripts.utilities import pdf_converter as pc
 
 
+# Provides the conv fixture.
 @pytest.fixture
 def conv():
     return pc.PDFConverter()
 
 
 class TestDocxToPdf:
+    # Tests windows branch invokes docx2pdf.
     def test_windows_branch_invokes_docx2pdf(self, conv):
         conv.system = "Windows"
         fake_docx2pdf = MagicMock()
@@ -28,6 +24,7 @@ class TestDocxToPdf:
             conv.docx_to_pdf("in.docx", "out.pdf")
         fake_docx2pdf.convert.assert_called_once_with("in.docx", "out.pdf")
 
+    # Tests linux branch invokes soffice.
     def test_linux_branch_invokes_soffice(self, conv, capsys):
         conv.system = "Linux"
         with patch.object(pc.subprocess, "run") as run:
@@ -37,8 +34,11 @@ class TestDocxToPdf:
 
 
 class TestImagesToPdf:
+    # Tests iterates and writes.
     def test_iterates_and_writes(self, conv, tmp_path):
+
         from PIL import Image
+
         p1 = tmp_path / "a.png"
         Image.new("RGB", (10, 10), "red").save(p1)
         out = tmp_path / "out.pdf"
@@ -51,6 +51,7 @@ class TestImagesToPdf:
 
 
 class TestMergePdfs:
+    # Tests merges inputs.
     def test_merges_inputs(self, conv, tmp_path):
         merger = MagicMock()
         with patch.object(pc, "PdfMerger", return_value=merger):

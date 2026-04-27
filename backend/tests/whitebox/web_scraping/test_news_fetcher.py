@@ -1,11 +1,3 @@
-"""Targeted whitebox coverage for ``scripts/web_scraping/news_fetcher.py``.
-
-Slim — three direct tests for ``fetch_headlines_generic``,
-``fetch_from_source`` (hackernews branch), and the keyword-filter
-helper.  CLI smoke tests only hit error paths because every HTTP call
-is mocked to fail.
-"""
-
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -15,6 +7,7 @@ import pytest
 from scripts.web_scraping.news_fetcher import NewsFetcher
 
 
+# Defines the resp helper.
 def _resp(content=b""):
     r = MagicMock()
     r.content = content
@@ -22,12 +15,14 @@ def _resp(content=b""):
     return r
 
 
+# Provides the fetcher fixture.
 @pytest.fixture
 def fetcher():
     return NewsFetcher()
 
 
 class TestFetchHeadlinesGeneric:
+    # Tests extracts long titles only.
     def test_extracts_long_titles_only(self, fetcher):
         html = b"""
             <html><body>
@@ -45,11 +40,13 @@ class TestFetchHeadlinesGeneric:
 
 
 class TestFetchFromSource:
+    # Tests unknown source.
     def test_unknown_source(self, fetcher, capsys):
         out = fetcher.fetch_from_source("nope")
         assert out == []
         assert "Unknown source" in capsys.readouterr().out
 
+    # Tests hackernews branch.
     def test_hackernews_branch(self, fetcher):
         html = b"""<html><body>
             <a class='storylink' href='item?id=1'>HN headline one</a>

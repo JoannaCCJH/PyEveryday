@@ -1,20 +1,15 @@
-"""Whitebox coverage for ``scripts/web_scraping/weather_checker.py``.
-
-Slimmed: CLI tests already exercise dispatch.  Here we keep the API +
-fallback behavior and the no-key short-circuit because they verify the
-*returned* data shape, not just stdout.
-"""
-
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 import requests
 
 from scripts.web_scraping.weather_checker import WeatherChecker
 
 
+# Defines the resp helper.
 def _resp(payload):
     r = MagicMock()
     r.json.return_value = payload
@@ -22,6 +17,7 @@ def _resp(payload):
     return r
 
 
+# Provides the metric_payload fixture.
 @pytest.fixture
 def metric_payload():
     return {
@@ -34,6 +30,7 @@ def metric_payload():
     }
 
 
+# Provides the wttr_payload fixture.
 @pytest.fixture
 def wttr_payload():
     return {
@@ -47,6 +44,7 @@ def wttr_payload():
 
 
 class TestGetWeatherByCity:
+    # Tests api key success.
     def test_api_key_success(self, metric_payload):
         checker = WeatherChecker(api_key="key")
         with patch("scripts.web_scraping.weather_checker.requests.get",
@@ -54,6 +52,7 @@ class TestGetWeatherByCity:
             out = checker.get_weather_by_city("Mysuru")
         assert out["city"] == "Mysuru" and out["temperature"] == "25.0°C"
 
+    # Tests api key request exception falls back.
     def test_api_key_request_exception_falls_back(self, wttr_payload):
         checker = WeatherChecker(api_key="key")
         with patch("scripts.web_scraping.weather_checker.requests.get",
@@ -64,6 +63,7 @@ class TestGetWeatherByCity:
 
 
 class TestGetWeatherByCoordinates:
+    # Tests no api key short circuits.
     def test_no_api_key_short_circuits(self, capsys):
         checker = WeatherChecker(api_key=None)
         assert checker.get_weather_by_coordinates(0, 0) is None
@@ -71,6 +71,7 @@ class TestGetWeatherByCoordinates:
 
 
 class TestFormatHelpers:
+    # Tests format imperial.
     def test_format_imperial(self, metric_payload):
         out = WeatherChecker().format_weather_data(metric_payload, "imperial")
         assert out["temperature"].endswith("°F") and out["wind_speed"].endswith("mph")

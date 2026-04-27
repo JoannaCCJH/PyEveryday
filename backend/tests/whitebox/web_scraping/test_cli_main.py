@@ -1,18 +1,15 @@
-"""CLI smoke tests for web_scraping scripts via ``runpy``.
-
-All network calls are mocked so the ``__main__`` dispatch branches run
-without external dependencies.
-"""
-
 from __future__ import annotations
 
 import runpy
+
 import sys
+
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 
+# Defines the run helper.
 def _run(module_name, argv, **patches):
     ctxs = [patch.object(sys, "argv", list(argv))]
     for target, value in patches.items():
@@ -29,11 +26,13 @@ def _run(module_name, argv, **patches):
             c.__exit__(None, None, None)
 
 
+# Provides the isolate_cwd fixture.
 @pytest.fixture(autouse=True)
 def _isolate_cwd(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
 
+# Defines the resp helper.
 def _resp(payload, status_code=200, content=b""):
     r = MagicMock()
     r.status_code = status_code
@@ -42,13 +41,10 @@ def _resp(payload, status_code=200, content=b""):
     r.json.return_value = payload
     r.raise_for_status.return_value = None
     return r
-
-
-# --------------------------- weather_checker --------------------------------
-
 WC = "scripts.web_scraping.weather_checker"
 
 
+# Defines the weather_payload helper.
 def _weather_payload():
     return {
         "name": "Mysuru", "sys": {"country": "IN"},
@@ -58,6 +54,7 @@ def _weather_payload():
     }
 
 
+# Defines the wttr_payload helper.
 def _wttr_payload():
     return {"current_condition": [{
         "temp_C": "20", "FeelsLikeC": "21",
@@ -67,6 +64,7 @@ def _wttr_payload():
     }]}
 
 
+# Defines the forecast_payload helper.
 def _forecast_payload():
     return {
         "city": {"name": "C"},
@@ -76,6 +74,7 @@ def _forecast_payload():
 
 
 class TestWeatherCheckerCLI:
+    # Tests dispatch.
     @pytest.mark.parametrize("argv", [
         [WC],
         [WC, "Mysuru"],
@@ -86,30 +85,28 @@ class TestWeatherCheckerCLI:
         [WC, "coords", "0", "0", "key"],
     ])
     def test_dispatch(self, argv, capsys):
-        # Returns weather first, then wttr fallback if weather fails.
         _run(WC, argv,
              **{"scripts.web_scraping.weather_checker.requests.get":
                 MagicMock(return_value=_resp(_weather_payload())),
                 "builtins.input": lambda *a, **kw: "n"})
         capsys.readouterr()
 
+    # Tests forecast with payload.
     def test_forecast_with_payload(self, capsys):
         _run(WC, [WC, "forecast", "C", "key", "5"],
              **{"scripts.web_scraping.weather_checker.requests.get":
                 MagicMock(return_value=_resp(_forecast_payload()))})
         capsys.readouterr()
-
-
-# --------------------------- news_fetcher -----------------------------------
-
 NF = "scripts.web_scraping.news_fetcher"
 
 
+# Defines the hn_payload helper.
 def _hn_payload():
     return [1, 2, 3]
 
 
 class TestNewsFetcherCLI:
+    # Tests dispatch.
     @pytest.mark.parametrize("argv", [
         [NF],
         [NF, "all", "2"],
@@ -123,24 +120,20 @@ class TestNewsFetcherCLI:
         [NF, "wat"],
     ])
     def test_dispatch(self, argv, capsys):
-        # Make every HTTP call fail-soft so dispatch reaches its branches.
         _run(NF, argv,
              **{"scripts.web_scraping.news_fetcher.requests.get":
                 MagicMock(side_effect=RuntimeError("net")),
                 "builtins.input": lambda *a, **kw: "n"})
         capsys.readouterr()
-
-
-# --------------------------- web_scraper ------------------------------------
-
 WS = "scripts.web_scraping.web_scraper"
 
 
 class TestWebScraperCLI:
+    # Tests usage dispatch.
     @pytest.mark.parametrize("argv", [
         [WS],
         [WS, "text"],
-        [WS, "text", "https://x", "{not-json"],     # invalid JSON branch
+        [WS, "text", "https://x", "{not-json"],
         [WS, "links"],
         [WS, "images"],
         [WS, "table"],
@@ -155,6 +148,7 @@ class TestWebScraperCLI:
                 MagicMock()})
         capsys.readouterr()
 
+    # Tests real dispatch.
     @pytest.mark.parametrize("argv", [
         [WS, "text", "https://x", '{"t": "h1"}'],
         [WS, "links", "https://x"],
@@ -175,13 +169,10 @@ class TestWebScraperCLI:
         _run(WS, argv,
              **{"scripts.web_scraping.web_scraper.requests.Session": sess})
         capsys.readouterr()
-
-
-# --------------------------- youtube_downloader -----------------------------
-
 YT = "scripts.web_scraping.youtube_downloader"
 
 
+# Defines the ydl_mock helper.
 def _ydl_mock(extract_info):
     inst = MagicMock()
     inst.extract_info.return_value = extract_info
@@ -189,9 +180,8 @@ def _ydl_mock(extract_info):
     cls.return_value.__enter__.return_value = inst
     cls.return_value.__exit__.return_value = False
     return MagicMock(YoutubeDL=cls)
-
-
 class TestYoutubeDownloaderCLI:
+    # Tests usage dispatch.
     @pytest.mark.parametrize("argv", [
         [YT],
         [YT, "info"],
@@ -210,6 +200,7 @@ class TestYoutubeDownloaderCLI:
                 _ydl_mock({})})
         capsys.readouterr()
 
+    # Tests real dispatch.
     @pytest.mark.parametrize("argv,info", [
         ([YT, "info", "https://yt/x"],
          {"title": "T", "uploader": "U", "duration": 65, "view_count": 100,
