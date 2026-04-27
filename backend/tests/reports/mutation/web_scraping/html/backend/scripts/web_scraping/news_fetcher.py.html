@@ -1,1 +1,232 @@
-<html><body><h1>backend/scripts/web_scraping/news_fetcher.py</h1>Killed 0 out of 197 mutants</body></html>
+<html><body><h1>backend/scripts/web_scraping/news_fetcher.py</h1>Killed 16 out of 197 mutants<h2>Survived</h2>Survived mutation testing. These mutants show holes in your test suite.<h3>Mutant 760</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -50,7 +50,7 @@
+                 elements = soup.select(selector)
+                 
+                 for element in elements[:max_headlines]:
+-                    text = element.get_text(strip=True)
++                    text = element.get_text(strip=False)
+                     link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('href'))
+                     
+                     if text and len(text) > 20:
+</pre><h3>Mutant 762</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -51,7 +51,7 @@
+                 
+                 for element in elements[:max_headlines]:
+                     text = element.get_text(strip=True)
+-                    link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('href'))
++                    link = element.get('XXhrefXX') or (element.find_parent('a') and element.find_parent('a').get('href'))
+                     
+                     if text and len(text) > 20:
+                         if link and not link.startswith('http'):
+</pre><h3>Mutant 763</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -51,7 +51,7 @@
+                 
+                 for element in elements[:max_headlines]:
+                     text = element.get_text(strip=True)
+-                    link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('href'))
++                    link = element.get('href') or (element.find_parent('XXaXX') and element.find_parent('a').get('href'))
+                     
+                     if text and len(text) > 20:
+                         if link and not link.startswith('http'):
+</pre><h3>Mutant 765</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -51,7 +51,7 @@
+                 
+                 for element in elements[:max_headlines]:
+                     text = element.get_text(strip=True)
+-                    link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('href'))
++                    link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('XXhrefXX'))
+                     
+                     if text and len(text) > 20:
+                         if link and not link.startswith('http'):
+</pre><h3>Mutant 767</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -51,7 +51,7 @@
+                 
+                 for element in elements[:max_headlines]:
+                     text = element.get_text(strip=True)
+-                    link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('href'))
++                    link = element.get('href') and (element.find_parent('a') and element.find_parent('a').get('href'))
+                     
+                     if text and len(text) > 20:
+                         if link and not link.startswith('http'):
+</pre><h3>Mutant 768</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -51,7 +51,7 @@
+                 
+                 for element in elements[:max_headlines]:
+                     text = element.get_text(strip=True)
+-                    link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('href'))
++                    link = None
+                     
+                     if text and len(text) > 20:
+                         if link and not link.startswith('http'):
+</pre><h3>Mutant 769</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -53,7 +53,7 @@
+                     text = element.get_text(strip=True)
+                     link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('href'))
+                     
+-                    if text and len(text) > 20:
++                    if text and len(text) >= 20:
+                         if link and not link.startswith('http'):
+                             from urllib.parse import urljoin
+                             link = urljoin(url, link)
+</pre><h3>Mutant 770</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -53,7 +53,7 @@
+                     text = element.get_text(strip=True)
+                     link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('href'))
+                     
+-                    if text and len(text) > 20:
++                    if text and len(text) > 21:
+                         if link and not link.startswith('http'):
+                             from urllib.parse import urljoin
+                             link = urljoin(url, link)
+</pre><h3>Mutant 772</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -54,7 +54,7 @@
+                     link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('href'))
+                     
+                     if text and len(text) > 20:
+-                        if link and not link.startswith('http'):
++                        if link and  link.startswith('http'):
+                             from urllib.parse import urljoin
+                             link = urljoin(url, link)
+                         
+</pre><h3>Mutant 773</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -54,7 +54,7 @@
+                     link = element.get('href') or (element.find_parent('a') and element.find_parent('a').get('href'))
+                     
+                     if text and len(text) > 20:
+-                        if link and not link.startswith('http'):
++                        if link and not link.startswith('XXhttpXX'):
+                             from urllib.parse import urljoin
+                             link = urljoin(url, link)
+                         
+</pre><h3>Mutant 779</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -64,7 +64,7 @@
+                             'source': url
+                         })
+                 
+-                if len(headlines) >= max_headlines:
++                if len(headlines) > max_headlines:
+                     break
+             
+             return headlines[:max_headlines]
+</pre><h3>Mutant 792</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -87,7 +87,7 @@
+             soup = BeautifulSoup(response.content, 'html.parser')
+             headlines = []
+             
+-            if source_name == 'hackernews':
++            if source_name != 'hackernews':
+                 title_elements = soup.select('a.storylink')
+                 
+                 for element in title_elements[:max_headlines]:
+</pre><h3>Mutant 793</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -87,7 +87,7 @@
+             soup = BeautifulSoup(response.content, 'html.parser')
+             headlines = []
+             
+-            if source_name == 'hackernews':
++            if source_name == 'XXhackernewsXX':
+                 title_elements = soup.select('a.storylink')
+                 
+                 for element in title_elements[:max_headlines]:
+</pre><h3>Mutant 796</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -91,7 +91,7 @@
+                 title_elements = soup.select('a.storylink')
+                 
+                 for element in title_elements[:max_headlines]:
+-                    title = element.get_text(strip=True)
++                    title = element.get_text(strip=False)
+                     link = element.get('href')
+                     
+                     if not link.startswith('http'):
+</pre><h3>Mutant 826</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -156,7 +156,7 @@
+                 items = soup.find_all('item')
+                 
+                 for item in items[:max_results]:
+-                    title = item.title.get_text() if item.title else "No title"
++                    title = item.title.get_text() if item.title else "XXNo titleXX"
+                     link = item.link.get_text() if item.link else "No link"
+                     description = item.description.get_text() if item.description else ""
+                     
+</pre><h3>Mutant 828</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -157,7 +157,7 @@
+                 
+                 for item in items[:max_results]:
+                     title = item.title.get_text() if item.title else "No title"
+-                    link = item.link.get_text() if item.link else "No link"
++                    link = item.link.get_text() if item.link else "XXNo linkXX"
+                     description = item.description.get_text() if item.description else ""
+                     
+                     search_results.append({
+</pre><h3>Mutant 829</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -157,7 +157,7 @@
+                 
+                 for item in items[:max_results]:
+                     title = item.title.get_text() if item.title else "No title"
+-                    link = item.link.get_text() if item.link else "No link"
++                    link = None
+                     description = item.description.get_text() if item.description else ""
+                     
+                     search_results.append({
+</pre><h3>Mutant 830</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -158,7 +158,7 @@
+                 for item in items[:max_results]:
+                     title = item.title.get_text() if item.title else "No title"
+                     link = item.link.get_text() if item.link else "No link"
+-                    description = item.description.get_text() if item.description else ""
++                    description = item.description.get_text() if item.description else "XXXX"
+                     
+                     search_results.append({
+                         'title': title,
+</pre><h3>Mutant 831</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -158,7 +158,7 @@
+                 for item in items[:max_results]:
+                     title = item.title.get_text() if item.title else "No title"
+                     link = item.link.get_text() if item.link else "No link"
+-                    description = item.description.get_text() if item.description else ""
++                    description = None
+                     
+                     search_results.append({
+                         'title': title,
+</pre><h3>Mutant 846</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -207,7 +207,7 @@
+         }
+         
+         with open(filename, 'w', encoding='utf-8') as f:
+-            json.dump(data, f, indent=2, ensure_ascii=False)
++            json.dump(data, f, indent=3, ensure_ascii=False)
+         
+         print(f"Headlines saved to {filename}")
+     
+</pre><h3>Mutant 847</h3><pre>--- backend/scripts/web_scraping/news_fetcher.py
++++ backend/scripts/web_scraping/news_fetcher.py
+@@ -207,7 +207,7 @@
+         }
+         
+         with open(filename, 'w', encoding='utf-8') as f:
+-            json.dump(data, f, indent=2, ensure_ascii=False)
++            json.dump(data, f, indent=2, ensure_ascii=True)
+         
+         print(f"Headlines saved to {filename}")
+     
+</pre></body></html>

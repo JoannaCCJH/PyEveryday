@@ -1,1 +1,122 @@
-<html><body><h1>backend/scripts/web_scraping/web_scraper.py</h1>Killed 26 out of 383 mutants<h2>Survived</h2>Survived mutation testing. These mutants show holes in your test suite.
+<html><body><h1>backend/scripts/web_scraping/web_scraper.py</h1>Killed 54 out of 383 mutants<h2>Survived</h2>Survived mutation testing. These mutants show holes in your test suite.<h3>Mutant 15</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -35,7 +35,7 @@
+             extracted_data = {}
+             for name, selector in selectors.items():
+                 elements = soup.select(selector)
+-                extracted_data[name] = [elem.get_text(strip=True) for elem in elements]
++                extracted_data[name] = [elem.get_text(strip=False) for elem in elements]
+             return extracted_data
+         else:
+             return soup.get_text(strip=True)
+</pre><h3>Mutant 29</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -51,7 +51,7 @@
+         for link in soup.find_all('a', href=True):
+             href = link['href']
+             
+-            if absolute and not href.startswith('http'):
++            if absolute and not href.startswith('XXhttpXX'):
+                 href = urljoin(url, href)
+             
+             if filter_pattern:
+</pre><h3>Mutant 33</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -58,7 +58,7 @@
+                 if re.search(filter_pattern, href):
+                     links.append({
+                         'url': href,
+-                        'text': link.get_text(strip=True),
++                        'XXtextXX': link.get_text(strip=True),
+                         'title': link.get('title', '')
+                     })
+             else:
+</pre><h3>Mutant 34</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -58,7 +58,7 @@
+                 if re.search(filter_pattern, href):
+                     links.append({
+                         'url': href,
+-                        'text': link.get_text(strip=True),
++                        'text': link.get_text(strip=False),
+                         'title': link.get('title', '')
+                     })
+             else:
+</pre><h3>Mutant 40</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -64,7 +64,7 @@
+             else:
+                 links.append({
+                     'url': href,
+-                    'text': link.get_text(strip=True),
++                    'text': link.get_text(strip=False),
+                     'title': link.get('title', '')
+                 })
+         
+</pre><h3>Mutant 57</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -83,7 +83,7 @@
+             if not src:
+                 continue
+             
+-            if not src.startswith('http'):
++            if not src.startswith('XXhttpXX'):
+                 src = urljoin(url, src)
+             
+             alt_text = img.get('alt', '')
+</pre><h3>Mutant 88</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -122,7 +122,7 @@
+             headers = []
+             header_row = rows[0]
+             for th in header_row.find_all(['th', 'td']):
+-                headers.append(th.get_text(strip=True))
++                headers.append(th.get_text(strip=False))
+             
+             table_rows = []
+             for row in rows[1:]:
+</pre><h3>Mutant 95</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -129,7 +129,7 @@
+                 cells = row.find_all(['td', 'th'])
+                 row_data = []
+                 for cell in cells:
+-                    row_data.append(cell.get_text(strip=True))
++                    row_data.append(cell.get_text(strip=False))
+                 if row_data:
+                     table_rows.append(row_data)
+             
+</pre><h3>Mutant 130</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -165,7 +165,7 @@
+                 }
+                 
+                 if input_field.name == 'select':
+-                    options = [option.get_text(strip=True) for option in input_field.find_all('option')]
++                    options = [option.get_text(strip=False) for option in input_field.find_all('option')]
+                     field_data['options'] = options
+                 
+                 form_data['fields'].append(field_data)
+</pre><h3>Mutant 143</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -226,7 +226,7 @@
+     def save_data(self, data, filename, format='json'):
+         if format.lower() == 'json':
+             with open(filename, 'w', encoding='utf-8') as f:
+-                json.dump(data, f, indent=2, ensure_ascii=False)
++                json.dump(data, f, indent=3, ensure_ascii=False)
+         
+         elif format.lower() == 'csv':
+             if isinstance(data, list) and len(data) > 0:
+</pre><h3>Mutant 144</h3><pre>--- backend/scripts/web_scraping/web_scraper.py
++++ backend/scripts/web_scraping/web_scraper.py
+@@ -226,7 +226,7 @@
+     def save_data(self, data, filename, format='json'):
+         if format.lower() == 'json':
+             with open(filename, 'w', encoding='utf-8') as f:
+-                json.dump(data, f, indent=2, ensure_ascii=False)
++                json.dump(data, f, indent=2, ensure_ascii=True)
+         
+         elif format.lower() == 'csv':
+             if isinstance(data, list) and len(data) > 0:
+</pre></body></html>

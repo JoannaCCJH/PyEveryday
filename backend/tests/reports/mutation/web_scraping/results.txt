@@ -5,26 +5,17 @@ To show a mutant:
     mutmut show <id>
 
 
-Survived 🙁 (6)
+Survived 🙁 (71)
 
----- backend/scripts/web_scraping/web_scraper.py (6) ----
+---- backend/scripts/web_scraping/news_fetcher.py (21) ----
 
-5-6, 8, 15, 29-30
+760, 762-763, 765, 767-770, 772-773, 779, 792-793, 796, 826, 828-831, 846-847
 
-Untested/skipped (1177)
+---- backend/scripts/web_scraping/web_scraper.py (11) ----
 
----- backend/scripts/web_scraping/news_fetcher.py (197) ----
+15, 29, 33-34, 40, 57, 88, 95, 130, 143-144
 
-736-932
+---- backend/scripts/web_scraping/youtube_downloader.py (39) ----
 
----- backend/scripts/web_scraping/weather_checker.py (277) ----
+391-396, 412-414, 432-434, 438, 477-478, 482, 485-492, 496, 498, 502-505, 510, 512-513, 522, 524, 536, 538, 556, 560
 
-933-1209
-
----- backend/scripts/web_scraping/web_scraper.py (351) ----
-
-33-383
-
----- backend/scripts/web_scraping/youtube_downloader.py (352) ----
-
-384-735

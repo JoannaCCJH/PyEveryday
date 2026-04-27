@@ -1,0 +1,430 @@
+<html><body><h1>backend/scripts/web_scraping/youtube_downloader.py</h1>Killed 25 out of 346 mutants<h2>Survived</h2>Survived mutation testing. These mutants show holes in your test suite.<h3>Mutant 391</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -13,7 +13,7 @@
+         self.ydl_opts_video = {
+             'outtmpl': os.path.join(download_path, '%(title)s.%(ext)s'),
+             'format': 'best[height<=720]',
+-            'writeinfojson': True,
++            'XXwriteinfojsonXX': True,
+             'writesubtitles': True,
+             'writeautomaticsub': True,
+         }
+</pre><h3>Mutant 392</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -13,7 +13,7 @@
+         self.ydl_opts_video = {
+             'outtmpl': os.path.join(download_path, '%(title)s.%(ext)s'),
+             'format': 'best[height<=720]',
+-            'writeinfojson': True,
++            'writeinfojson': False,
+             'writesubtitles': True,
+             'writeautomaticsub': True,
+         }
+</pre><h3>Mutant 393</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -14,7 +14,7 @@
+             'outtmpl': os.path.join(download_path, '%(title)s.%(ext)s'),
+             'format': 'best[height<=720]',
+             'writeinfojson': True,
+-            'writesubtitles': True,
++            'XXwritesubtitlesXX': True,
+             'writeautomaticsub': True,
+         }
+         
+</pre><h3>Mutant 394</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -14,7 +14,7 @@
+             'outtmpl': os.path.join(download_path, '%(title)s.%(ext)s'),
+             'format': 'best[height<=720]',
+             'writeinfojson': True,
+-            'writesubtitles': True,
++            'writesubtitles': False,
+             'writeautomaticsub': True,
+         }
+         
+</pre><h3>Mutant 395</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -15,7 +15,7 @@
+             'format': 'best[height<=720]',
+             'writeinfojson': True,
+             'writesubtitles': True,
+-            'writeautomaticsub': True,
++            'XXwriteautomaticsubXX': True,
+         }
+         
+         self.ydl_opts_audio = {
+</pre><h3>Mutant 396</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -15,7 +15,7 @@
+             'format': 'best[height<=720]',
+             'writeinfojson': True,
+             'writesubtitles': True,
+-            'writeautomaticsub': True,
++            'writeautomaticsub': False,
+         }
+         
+         self.ydl_opts_audio = {
+</pre><h3>Mutant 412</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -31,7 +31,7 @@
+         self.ydl_opts_playlist = {
+             'outtmpl': os.path.join(download_path, '%(playlist_title)s/%(title)s.%(ext)s'),
+             'format': 'best[height<=720]',
+-            'writeinfojson': True,
++            'XXwriteinfojsonXX': True,
+         }
+     
+     def get_video_info(self, url):
+</pre><h3>Mutant 413</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -31,7 +31,7 @@
+         self.ydl_opts_playlist = {
+             'outtmpl': os.path.join(download_path, '%(playlist_title)s/%(title)s.%(ext)s'),
+             'format': 'best[height<=720]',
+-            'writeinfojson': True,
++            'writeinfojson': False,
+         }
+     
+     def get_video_info(self, url):
+</pre><h3>Mutant 414</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -37,7 +37,7 @@
+     def get_video_info(self, url):
+         try:
+             with yt_dlp.YoutubeDL({'quiet': True}) as ydl:  # pragma: no mutate
+-                info = ydl.extract_info(url, download=False)
++                info = ydl.extract_info(url, download=True)
+                 
+                 video_info = {
+                     'title': info.get('title', 'Unknown'),
+</pre><h3>Mutant 432</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -45,7 +45,7 @@
+                     'duration': info.get('duration', 0),
+                     'view_count': info.get('view_count', 0),
+                     'upload_date': info.get('upload_date', 'Unknown'),
+-                    'description': info.get('description', '')[:500] + '...' if info.get('description') else '',
++                    'description': info.get('XXdescriptionXX', '')[:500] + '...' if info.get('description') else '',
+                     'formats': len(info.get('formats', [])),
+                     'thumbnail': info.get('thumbnail', ''),
+                     'webpage_url': info.get('webpage_url', url)
+</pre><h3>Mutant 433</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -45,7 +45,7 @@
+                     'duration': info.get('duration', 0),
+                     'view_count': info.get('view_count', 0),
+                     'upload_date': info.get('upload_date', 'Unknown'),
+-                    'description': info.get('description', '')[:500] + '...' if info.get('description') else '',
++                    'description': info.get('description', 'XXXX')[:500] + '...' if info.get('description') else '',
+                     'formats': len(info.get('formats', [])),
+                     'thumbnail': info.get('thumbnail', ''),
+                     'webpage_url': info.get('webpage_url', url)
+</pre><h3>Mutant 434</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -45,7 +45,7 @@
+                     'duration': info.get('duration', 0),
+                     'view_count': info.get('view_count', 0),
+                     'upload_date': info.get('upload_date', 'Unknown'),
+-                    'description': info.get('description', '')[:500] + '...' if info.get('description') else '',
++                    'description': info.get('description', '')[:501] + '...' if info.get('description') else '',
+                     'formats': len(info.get('formats', [])),
+                     'thumbnail': info.get('thumbnail', ''),
+                     'webpage_url': info.get('webpage_url', url)
+</pre><h3>Mutant 438</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -45,7 +45,7 @@
+                     'duration': info.get('duration', 0),
+                     'view_count': info.get('view_count', 0),
+                     'upload_date': info.get('upload_date', 'Unknown'),
+-                    'description': info.get('description', '')[:500] + '...' if info.get('description') else '',
++                    'description': info.get('description', '')[:500] + '...' if info.get('description') else 'XXXX',
+                     'formats': len(info.get('formats', [])),
+                     'thumbnail': info.get('thumbnail', ''),
+                     'webpage_url': info.get('webpage_url', url)
+</pre><h3>Mutant 477</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -85,7 +85,7 @@
+         
+         if format == 'wav':
+             opts['postprocessors'][0]['preferredcodec'] = 'wav'
+-        elif format == 'm4a':
++        elif format != 'm4a':
+             opts['postprocessors'][0]['preferredcodec'] = 'm4a'
+         
+         try:
+</pre><h3>Mutant 478</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -85,7 +85,7 @@
+         
+         if format == 'wav':
+             opts['postprocessors'][0]['preferredcodec'] = 'wav'
+-        elif format == 'm4a':
++        elif format == 'XXm4aXX':
+             opts['postprocessors'][0]['preferredcodec'] = 'm4a'
+         
+         try:
+</pre><h3>Mutant 482</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -96,7 +96,7 @@
+         
+         except Exception as e:
+             print(f"Error downloading audio: {e}")
+-            return False
++            return True
+     
+     def download_playlist(self, url, max_videos=None, video_quality='720p'):
+         opts = self.ydl_opts_playlist.copy()
+</pre><h3>Mutant 485</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -100,7 +100,7 @@
+     
+     def download_playlist(self, url, max_videos=None, video_quality='720p'):
+         opts = self.ydl_opts_playlist.copy()
+-        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'best' else 'best'
++        opts['XXformatXX'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'best' else 'best'
+         
+         if max_videos:
+             opts['playlistend'] = max_videos
+</pre><h3>Mutant 486</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -100,7 +100,7 @@
+     
+     def download_playlist(self, url, max_videos=None, video_quality='720p'):
+         opts = self.ydl_opts_playlist.copy()
+-        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'best' else 'best'
++        opts['format'] = f'best[height<={video_quality[:+1]}]' if video_quality != 'best' else 'best'
+         
+         if max_videos:
+             opts['playlistend'] = max_videos
+</pre><h3>Mutant 487</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -100,7 +100,7 @@
+     
+     def download_playlist(self, url, max_videos=None, video_quality='720p'):
+         opts = self.ydl_opts_playlist.copy()
+-        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'best' else 'best'
++        opts['format'] = f'best[height<={video_quality[:-2]}]' if video_quality != 'best' else 'best'
+         
+         if max_videos:
+             opts['playlistend'] = max_videos
+</pre><h3>Mutant 488</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -100,7 +100,7 @@
+     
+     def download_playlist(self, url, max_videos=None, video_quality='720p'):
+         opts = self.ydl_opts_playlist.copy()
+-        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'best' else 'best'
++        opts['format'] = f'XXbest[height<={video_quality[:-1]}]XX' if video_quality != 'best' else 'best'
+         
+         if max_videos:
+             opts['playlistend'] = max_videos
+</pre><h3>Mutant 489</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -100,7 +100,7 @@
+     
+     def download_playlist(self, url, max_videos=None, video_quality='720p'):
+         opts = self.ydl_opts_playlist.copy()
+-        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'best' else 'best'
++        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality == 'best' else 'best'
+         
+         if max_videos:
+             opts['playlistend'] = max_videos
+</pre><h3>Mutant 490</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -100,7 +100,7 @@
+     
+     def download_playlist(self, url, max_videos=None, video_quality='720p'):
+         opts = self.ydl_opts_playlist.copy()
+-        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'best' else 'best'
++        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'XXbestXX' else 'best'
+         
+         if max_videos:
+             opts['playlistend'] = max_videos
+</pre><h3>Mutant 491</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -100,7 +100,7 @@
+     
+     def download_playlist(self, url, max_videos=None, video_quality='720p'):
+         opts = self.ydl_opts_playlist.copy()
+-        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'best' else 'best'
++        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'best' else 'XXbestXX'
+         
+         if max_videos:
+             opts['playlistend'] = max_videos
+</pre><h3>Mutant 492</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -100,7 +100,7 @@
+     
+     def download_playlist(self, url, max_videos=None, video_quality='720p'):
+         opts = self.ydl_opts_playlist.copy()
+-        opts['format'] = f'best[height<={video_quality[:-1]}]' if video_quality != 'best' else 'best'
++        opts['format'] = None
+         
+         if max_videos:
+             opts['playlistend'] = max_videos
+</pre><h3>Mutant 496</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -109,7 +109,7 @@
+             with yt_dlp.YoutubeDL(opts) as ydl:
+                 ydl.download([url])
+                 print("Playlist downloaded successfully")
+-                return True
++                return False
+         
+         except Exception as e:
+             print(f"Error downloading playlist: {e}")
+</pre><h3>Mutant 498</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -113,7 +113,7 @@
+         
+         except Exception as e:
+             print(f"Error downloading playlist: {e}")
+-            return False
++            return True
+     
+     def download_subtitles_only(self, url, languages=['en']):
+         opts = {
+</pre><h3>Mutant 502</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -118,7 +118,7 @@
+     def download_subtitles_only(self, url, languages=['en']):
+         opts = {
+             'skip_download': True,
+-            'writesubtitles': True,
++            'XXwritesubtitlesXX': True,
+             'writeautomaticsub': True,
+             'subtitleslangs': languages,
+             'outtmpl': os.path.join(self.download_path, '%(title)s.%(ext)s'),
+</pre><h3>Mutant 503</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -118,7 +118,7 @@
+     def download_subtitles_only(self, url, languages=['en']):
+         opts = {
+             'skip_download': True,
+-            'writesubtitles': True,
++            'writesubtitles': False,
+             'writeautomaticsub': True,
+             'subtitleslangs': languages,
+             'outtmpl': os.path.join(self.download_path, '%(title)s.%(ext)s'),
+</pre><h3>Mutant 504</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -119,7 +119,7 @@
+         opts = {
+             'skip_download': True,
+             'writesubtitles': True,
+-            'writeautomaticsub': True,
++            'XXwriteautomaticsubXX': True,
+             'subtitleslangs': languages,
+             'outtmpl': os.path.join(self.download_path, '%(title)s.%(ext)s'),
+         }
+</pre><h3>Mutant 505</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -119,7 +119,7 @@
+         opts = {
+             'skip_download': True,
+             'writesubtitles': True,
+-            'writeautomaticsub': True,
++            'writeautomaticsub': False,
+             'subtitleslangs': languages,
+             'outtmpl': os.path.join(self.download_path, '%(title)s.%(ext)s'),
+         }
+</pre><h3>Mutant 510</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -128,7 +128,7 @@
+             with yt_dlp.YoutubeDL(opts) as ydl:
+                 ydl.download([url])
+                 print("Subtitles downloaded successfully")
+-                return True
++                return False
+         
+         except Exception as e:
+             print(f"Error downloading subtitles: {e}")
+</pre><h3>Mutant 512</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -132,7 +132,7 @@
+         
+         except Exception as e:
+             print(f"Error downloading subtitles: {e}")
+-            return False
++            return True
+     
+     def get_available_formats(self, url):
+         try:
+</pre><h3>Mutant 513</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -137,7 +137,7 @@
+     def get_available_formats(self, url):
+         try:
+             with yt_dlp.YoutubeDL({'quiet': True}) as ydl:  # pragma: no mutate
+-                info = ydl.extract_info(url, download=False)
++                info = ydl.extract_info(url, download=True)
+                 formats = info.get('formats', [])
+                 
+                 video_formats = []
+</pre><h3>Mutant 522</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -144,7 +144,7 @@
+                 audio_formats = []
+                 
+                 for fmt in formats:
+-                    if fmt.get('vcodec') != 'none' and fmt.get('acodec') != 'none':
++                    if fmt.get('vcodec') != 'none' and fmt.get('XXacodecXX') != 'none':
+                         video_formats.append({
+                             'format_id': fmt['format_id'],
+                             'ext': fmt['ext'],
+</pre><h3>Mutant 524</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -144,7 +144,7 @@
+                 audio_formats = []
+                 
+                 for fmt in formats:
+-                    if fmt.get('vcodec') != 'none' and fmt.get('acodec') != 'none':
++                    if fmt.get('vcodec') != 'none' and fmt.get('acodec') != 'XXnoneXX':
+                         video_formats.append({
+                             'format_id': fmt['format_id'],
+                             'ext': fmt['ext'],
+</pre><h3>Mutant 536</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -151,7 +151,7 @@
+                             'resolution': fmt.get('resolution', 'Unknown'),
+                             'filesize': fmt.get('filesize', 'Unknown')
+                         })
+-                    elif fmt.get('acodec') != 'none':
++                    elif fmt.get('XXacodecXX') != 'none':
+                         audio_formats.append({
+                             'format_id': fmt['format_id'],
+                             'ext': fmt['ext'],
+</pre><h3>Mutant 538</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -151,7 +151,7 @@
+                             'resolution': fmt.get('resolution', 'Unknown'),
+                             'filesize': fmt.get('filesize', 'Unknown')
+                         })
+-                    elif fmt.get('acodec') != 'none':
++                    elif fmt.get('acodec') != 'XXnoneXX':
+                         audio_formats.append({
+                             'format_id': fmt['format_id'],
+                             'ext': fmt['ext'],
+</pre><h3>Mutant 556</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -179,7 +179,7 @@
+         
+         except Exception as e:
+             print(f"Error downloading with custom format: {e}")
+-            return False
++            return True
+     
+     def search_youtube(self, query, max_results=10):
+         search_url = f"ytsearch{max_results}:{query}"
+</pre><h3>Mutant 560</h3><pre>--- backend/scripts/web_scraping/youtube_downloader.py
++++ backend/scripts/web_scraping/youtube_downloader.py
+@@ -186,7 +186,7 @@
+         
+         try:
+             with yt_dlp.YoutubeDL({'quiet': True}) as ydl:  # pragma: no mutate
+-                info = ydl.extract_info(search_url, download=False)
++                info = ydl.extract_info(search_url, download=True)
+                 
+                 results = []
+                 for entry in info.get('entries', []):
+</pre></body></html>
