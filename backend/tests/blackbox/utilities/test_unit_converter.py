@@ -140,3 +140,61 @@ class TestErrorGuessing:
         # EG: non-numeric value propagates the TypeError from multiplication.
         with pytest.raises(TypeError):
             uc.convert("not a number", "m", "km")
+
+
+class TestGetUnitNameEP:
+    def test_known_unit_returns_full_name(self, uc):
+        assert uc.get_unit_name("m", "length") == "Meter"
+
+    def test_unknown_unit_falls_back_to_uppercased_code(self, uc):
+        assert uc.get_unit_name("zzz", "length") == "ZZZ"
+
+
+class TestConvertMultipleEG:
+    def test_known_category_outputs_target_units(self, uc, capsys):
+        uc.convert_multiple(1000, "m", "length", target_units=["km", "cm"])
+        out = capsys.readouterr().out
+        assert "km" in out and "cm" in out
+        assert "Unknown category" not in out
+
+    def test_unknown_category_prints_error_and_returns(self, uc, capsys):
+        uc.convert_multiple(1000, "m", "fake_cat")
+        assert "Unknown category" in capsys.readouterr().out
+
+    def test_skips_self_conversion_in_loop(self, uc, capsys):
+        uc.convert_multiple(1000, "m", "length", target_units=["m", "km"])
+        lines = capsys.readouterr().out.splitlines()
+        assert [l for l in lines if l.lstrip().startswith("m:")] == []
+
+    def test_invalid_target_unit_skipped_in_output(self, uc, capsys):
+        uc.convert_multiple(1000, "m", "length", target_units=["km", "bogus"])
+        lines = capsys.readouterr().out.splitlines()
+        assert [l for l in lines if l.lstrip().startswith("bogus:")] == []
+
+
+class TestCalculateRatioBranches:
+    def test_known_category_known_units_returns_ratio(self, uc):
+        assert uc.calculate_ratio(1000, "m", 1, "km", "length") == pytest.approx(1.0)
+
+    def test_unknown_category_returns_none(self, uc):
+        assert uc.calculate_ratio(1, "m", 2, "m", "fake_cat") is None
+
+
+class TestFindBestUnit:
+    def test_known_category_picks_unit_in_one_to_hundred_range(self, uc):
+        assert uc.find_best_unit(1000, "mm", "length") == "m"
+
+    def test_unknown_category_returns_input_unit(self, uc):
+        assert uc.find_best_unit(1, "anything", "fake_cat") == "anything"
+
+
+class TestSmartConvertBranches:
+    def test_known_unit_dispatches_without_unknown_message(self, uc, capsys):
+        uc.smart_convert(1000, "mm")
+        out = capsys.readouterr().out
+        assert "Unknown unit" not in out
+        assert "UNIT CONVERSION" in out
+
+    def test_unknown_unit_prints_unknown_message(self, uc, capsys):
+        uc.smart_convert(1, "fakeunit")
+        assert "Unknown unit" in capsys.readouterr().out

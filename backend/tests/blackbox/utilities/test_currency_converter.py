@@ -61,6 +61,10 @@ class TestConvertEP:
         with patch("requests.get", return_value=_ok_response({"rates": {"EUR": 0.85}})):
             assert cc.convert(100, "USD", "BOGUS") is None
 
+    def test_cross_currency_missing_one_rate_returns_none(self, cc):
+        with patch("requests.get", return_value=_ok_response({"rates": {"EUR": 0.85}})):
+            assert cc.convert(85, "EUR", "GBP") is None
+
     def test_case_insensitive_currency_codes(self, cc):
         # EP: currency codes uppercased internally.
         with patch("requests.get", return_value=_ok_response({"rates": {"EUR": 0.85}})):
@@ -85,6 +89,9 @@ class TestFormatCurrencyEP:
     def test_jpy_has_no_decimal_places(self, cc):
         # EP: JPY special-cased to 0 decimals.
         assert cc.format_currency(1234.56, "JPY") == "\u00a51,235"
+
+    def test_krw_has_no_decimal_places(self, cc):
+        assert cc.format_currency(1234.56, "KRW") == "\u20a91,235"
 
     def test_usd_has_two_decimal_places(self, cc):
         # EP: default class uses 2 decimals.
@@ -145,3 +152,11 @@ class TestErrorGuessing:
     def test_get_currency_info_lowercase(self, cc):
         # EG: lowercase input is upper-cased internally.
         assert cc.get_currency_info("usd") == "US Dollar"
+
+    def test_convert_and_display_success_returns_result_and_prints_summary(self, cc, capsys):
+        with patch("requests.get", return_value=_ok_response({"rates": {"EUR": 0.85}})):
+            result = cc.convert_and_display(100, "USD", "EUR")
+        out = capsys.readouterr().out
+        assert result == pytest.approx(85.0)
+        assert "From:" in out
+        assert "To:" in out

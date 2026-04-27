@@ -240,3 +240,138 @@ class TestCustomPatternEP:
         assert result[0] in string.ascii_uppercase
         assert result[1] == '-'
         assert result[2] in string.digits
+
+    def test_pattern_U_token_produces_varied_uppercase(self, gen):
+        results = {gen.generate_custom_pattern("U") for _ in range(50)}
+        assert len(results) > 1
+        assert all(c in string.ascii_uppercase for c in results)
+
+    def test_pattern_X_token_produces_varied_alphanumeric(self, gen):
+        results = {gen.generate_custom_pattern("X") for _ in range(50)}
+        assert len(results) > 1
+        alphanum = set(string.ascii_letters + string.digits)
+        assert all(c in alphanum for c in results)
+
+
+class TestDefaultArguments:
+    def test_generate_random_password_default_length_is_12(self, gen, fixed_secrets):
+        assert len(gen.generate_random_password()) == 12
+
+    def test_generate_random_password_defaults_enable_all_classes(self, gen):
+        seen_lower = seen_upper = seen_digit = seen_symbol = False
+        for _ in range(50):
+            pwd = gen.generate_random_password()
+            seen_lower = seen_lower or any(c.islower() for c in pwd)
+            seen_upper = seen_upper or any(c.isupper() for c in pwd)
+            seen_digit = seen_digit or any(c.isdigit() for c in pwd)
+            seen_symbol = seen_symbol or any(c in SYMBOLS for c in pwd)
+        assert seen_lower and seen_upper and seen_digit and seen_symbol
+
+    def test_generate_random_password_default_does_not_exclude_ambiguous(self, gen):
+        total_l = 0
+        for _ in range(100):
+            pwd = gen.generate_random_password(
+                length=20, include_uppercase=False, include_lowercase=True,
+                include_digits=False, include_symbols=False,
+            )
+            total_l += pwd.count('l')
+        assert total_l > 30
+
+    def test_generate_memorable_password_defaults(self, gen, fixed_secrets):
+        pwd = gen.generate_memorable_password()
+        assert pwd.count('-') == 2
+        assert pwd[-2:].isdigit()
+        body = pwd[:-2]
+        for word in body.split('-'):
+            assert word and word[0].isupper()
+        assert 'XX' not in pwd
+
+
+class TestExcludeAmbiguousFilter:
+    def test_lowercase_only_pool_stays_in_lowercase(self, gen, fixed_secrets):
+        pwd = gen.generate_random_password(
+            length=20, include_uppercase=False, include_lowercase=True,
+            include_digits=False, include_symbols=False, exclude_ambiguous=True,
+        )
+        assert all(c in string.ascii_lowercase for c in pwd)
+
+    def test_lowercase_only_no_single_char_dominates(self, gen, fixed_secrets):
+        pwd = gen.generate_random_password(
+            length=20, include_uppercase=False, include_lowercase=True,
+            include_digits=False, include_symbols=False, exclude_ambiguous=True,
+        )
+        assert pwd.count('l') < 19
+
+    def test_uppercase_only_diverse_chars(self, gen, fixed_secrets):
+        pwd = gen.generate_random_password(
+            length=20, include_uppercase=True, include_lowercase=False,
+            include_digits=False, include_symbols=False, exclude_ambiguous=True,
+        )
+        assert all(c in string.ascii_uppercase for c in pwd)
+        assert len(set(pwd)) >= 5
+        assert pwd.count('X') < 10
+
+    def test_digits_only_diverse_chars(self, gen, fixed_secrets):
+        pwd = gen.generate_random_password(
+            length=20, include_uppercase=False, include_lowercase=False,
+            include_digits=True, include_symbols=False, exclude_ambiguous=True,
+        )
+        assert all(c in string.digits for c in pwd)
+        assert (pwd.count('0') + pwd.count('1')) < 19
+
+
+class TestPassphraseBA:
+    def test_passphrase_pool_at_exact_length_uses_real_words(self, gen, fixed_secrets):
+        pwd = gen.generate_passphrase(num_words=4, min_length=6, max_length=6)
+        parts = pwd.split(' ')
+        assert len(parts) == 4
+        for p in parts:
+            assert len(p) == 6
+
+
+class TestPasswordStrengthScoring:
+    def test_score_at_length_8_lowercase_only(self, gen):
+        result = gen.check_password_strength("abcdefgh")
+        assert result['score'] == 3
+
+    def test_score_at_length_12_lowercase_only(self, gen):
+        result = gen.check_password_strength("abcdefghijkl")
+        assert result['score'] == 4
+
+    def test_score_no_symbols_does_not_credit_symbol_class(self, gen):
+        result = gen.check_password_strength("Uvwxyz12")
+        assert "Include special characters" in result['feedback']
+        assert result['score'] == 6
+
+    def test_score_clean_full_class_password(self, gen):
+        result = gen.check_password_strength("Uvwxyz!1")
+        assert result['score'] == 7
+
+    def test_score_pattern_at_password_end_is_caught(self, gen):
+        result = gen.check_password_strength("Uvwxy123")
+        assert "Avoid common patterns" in result['feedback']
+
+
+class TestGenerateMultipleEG:
+    def test_multiple_passwords_sorted_by_score_descending(self, gen, monkeypatch):
+        samples = iter(["a", "Aa1!", "Aa1!Bb2@", "abc12!Z", "Aa1!Bb2@Cc3#"])
+        monkeypatch.setattr(gen, 'generate_random_password',
+                            lambda **kw: next(samples))
+        pwds = gen.generate_multiple_passwords(count=5)
+        scores = [p['score'] for p in pwds]
+        assert len(set(scores)) > 1, f"setup error: {scores}"
+        assert scores == sorted(scores, reverse=True)
+
+
+# =========================================================================
+# EG — display_password_info side effects (stdout)
+# =========================================================================
+
+class TestDisplayPasswordInfoEG:
+    def test_display_default_shows_strength_section(self, gen, capsys):
+        gen.display_password_info("weak")
+        assert "Strength:" in capsys.readouterr().out
+
+    def test_display_weak_password_shows_feedback_suggestions(self, gen, capsys):
+        gen.display_password_info("weak")
+        assert "Suggestions:" in capsys.readouterr().out
