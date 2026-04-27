@@ -83,11 +83,12 @@ run_one() {
 
   # Snapshot results.
   cp -f .mutmut-cache "$out/mutmut-cache.sqlite3" 2>/dev/null || true
-  mutmut results > "$out/results.txt" 2>&1 || true
+  mutmut results 2>&1 | awk '/^Untested\/skipped/{skipping=1} !skipping' > "$out/results.txt" || true
   mutmut html >/dev/null 2>&1 || true
   if [[ -d html ]]; then
     rm -rf "$out/html"
     mv html "$out/html"
+    python "$ROOT/backend/tests/mutation/filter_html.py" "$out/html" || true
   fi
 
   echo "Wrote $out/results.txt"
