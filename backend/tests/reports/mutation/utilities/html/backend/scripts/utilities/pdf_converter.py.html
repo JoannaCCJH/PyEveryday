@@ -1,0 +1,12 @@
+<html><body><h1>backend/scripts/utilities/pdf_converter.py</h1>Killed 4 out of 63 mutants<h2>Survived</h2>Survived mutation testing. These mutants show holes in your test suite.<h3>Mutant 1328</h3><pre>--- backend/scripts/utilities/pdf_converter.py
++++ backend/scripts/utilities/pdf_converter.py
+@@ -25,7 +25,7 @@
+             try:
+                 subprocess.run(
+                     ["soffice", "--headless", "--convert-to", "pdf", input_path, "--outdir", output_path],
+-                    check=True
++                    check=False
+                 )
+                 print(f"✅ Converted {input_path} → {output_path} (LibreOffice)")
+             except Exception as e:
+</pre></body></html>

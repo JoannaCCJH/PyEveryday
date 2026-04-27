@@ -1,0 +1,188 @@
+<html><body><h1>backend/scripts/utilities/unit_converter.py</h1>Killed 48 out of 521 mutants<h2>Survived</h2>Survived mutation testing. These mutants show holes in your test suite.<h3>Mutant 1138</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -211,7 +211,7 @@
+             print(f"Cannot convert {from_unit} to {to_unit}")
+             return
+         
+-        precision = 6 if abs(value) < 1 else 4 if abs(value) < 100 else 2
++        precision = 7 if abs(value) < 1 else 4 if abs(value) < 100 else 2
+         
+         print(f"\n🔄 UNIT CONVERSION")
+         print("="*40)
+</pre><h3>Mutant 1139</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -211,7 +211,7 @@
+             print(f"Cannot convert {from_unit} to {to_unit}")
+             return
+         
+-        precision = 6 if abs(value) < 1 else 4 if abs(value) < 100 else 2
++        precision = 6 if abs(value) <= 1 else 4 if abs(value) < 100 else 2
+         
+         print(f"\n🔄 UNIT CONVERSION")
+         print("="*40)
+</pre><h3>Mutant 1140</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -211,7 +211,7 @@
+             print(f"Cannot convert {from_unit} to {to_unit}")
+             return
+         
+-        precision = 6 if abs(value) < 1 else 4 if abs(value) < 100 else 2
++        precision = 6 if abs(value) < 2 else 4 if abs(value) < 100 else 2
+         
+         print(f"\n🔄 UNIT CONVERSION")
+         print("="*40)
+</pre><h3>Mutant 1141</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -211,7 +211,7 @@
+             print(f"Cannot convert {from_unit} to {to_unit}")
+             return
+         
+-        precision = 6 if abs(value) < 1 else 4 if abs(value) < 100 else 2
++        precision = 6 if abs(value) < 1 else 5 if abs(value) < 100 else 2
+         
+         print(f"\n🔄 UNIT CONVERSION")
+         print("="*40)
+</pre><h3>Mutant 1142</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -211,7 +211,7 @@
+             print(f"Cannot convert {from_unit} to {to_unit}")
+             return
+         
+-        precision = 6 if abs(value) < 1 else 4 if abs(value) < 100 else 2
++        precision = 6 if abs(value) < 1 else 4 if abs(value) <= 100 else 2
+         
+         print(f"\n🔄 UNIT CONVERSION")
+         print("="*40)
+</pre><h3>Mutant 1143</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -211,7 +211,7 @@
+             print(f"Cannot convert {from_unit} to {to_unit}")
+             return
+         
+-        precision = 6 if abs(value) < 1 else 4 if abs(value) < 100 else 2
++        precision = 6 if abs(value) < 1 else 4 if abs(value) < 101 else 2
+         
+         print(f"\n🔄 UNIT CONVERSION")
+         print("="*40)
+</pre><h3>Mutant 1144</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -211,7 +211,7 @@
+             print(f"Cannot convert {from_unit} to {to_unit}")
+             return
+         
+-        precision = 6 if abs(value) < 1 else 4 if abs(value) < 100 else 2
++        precision = 6 if abs(value) < 1 else 4 if abs(value) < 100 else 3
+         
+         print(f"\n🔄 UNIT CONVERSION")
+         print("="*40)
+</pre><h3>Mutant 1169</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -239,7 +239,7 @@
+                 result = self.convert(value, from_unit, unit, category)
+                 if result is not None:
+                     unit_name = self.get_unit_name(unit, category)
+-                    precision = 6 if abs(result) < 1 else 4 if abs(result) < 100 else 2
++                    precision = 7 if abs(result) < 1 else 4 if abs(result) < 100 else 2
+                     print(f"{unit}: {result:.{precision}g} {unit_name}")
+         
+         print("="*50)
+</pre><h3>Mutant 1170</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -239,7 +239,7 @@
+                 result = self.convert(value, from_unit, unit, category)
+                 if result is not None:
+                     unit_name = self.get_unit_name(unit, category)
+-                    precision = 6 if abs(result) < 1 else 4 if abs(result) < 100 else 2
++                    precision = 6 if abs(result) <= 1 else 4 if abs(result) < 100 else 2
+                     print(f"{unit}: {result:.{precision}g} {unit_name}")
+         
+         print("="*50)
+</pre><h3>Mutant 1171</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -239,7 +239,7 @@
+                 result = self.convert(value, from_unit, unit, category)
+                 if result is not None:
+                     unit_name = self.get_unit_name(unit, category)
+-                    precision = 6 if abs(result) < 1 else 4 if abs(result) < 100 else 2
++                    precision = 6 if abs(result) < 2 else 4 if abs(result) < 100 else 2
+                     print(f"{unit}: {result:.{precision}g} {unit_name}")
+         
+         print("="*50)
+</pre><h3>Mutant 1172</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -239,7 +239,7 @@
+                 result = self.convert(value, from_unit, unit, category)
+                 if result is not None:
+                     unit_name = self.get_unit_name(unit, category)
+-                    precision = 6 if abs(result) < 1 else 4 if abs(result) < 100 else 2
++                    precision = 6 if abs(result) < 1 else 5 if abs(result) < 100 else 2
+                     print(f"{unit}: {result:.{precision}g} {unit_name}")
+         
+         print("="*50)
+</pre><h3>Mutant 1173</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -239,7 +239,7 @@
+                 result = self.convert(value, from_unit, unit, category)
+                 if result is not None:
+                     unit_name = self.get_unit_name(unit, category)
+-                    precision = 6 if abs(result) < 1 else 4 if abs(result) < 100 else 2
++                    precision = 6 if abs(result) < 1 else 4 if abs(result) <= 100 else 2
+                     print(f"{unit}: {result:.{precision}g} {unit_name}")
+         
+         print("="*50)
+</pre><h3>Mutant 1174</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -239,7 +239,7 @@
+                 result = self.convert(value, from_unit, unit, category)
+                 if result is not None:
+                     unit_name = self.get_unit_name(unit, category)
+-                    precision = 6 if abs(result) < 1 else 4 if abs(result) < 100 else 2
++                    precision = 6 if abs(result) < 1 else 4 if abs(result) < 101 else 2
+                     print(f"{unit}: {result:.{precision}g} {unit_name}")
+         
+         print("="*50)
+</pre><h3>Mutant 1175</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -239,7 +239,7 @@
+                 result = self.convert(value, from_unit, unit, category)
+                 if result is not None:
+                     unit_name = self.get_unit_name(unit, category)
+-                    precision = 6 if abs(result) < 1 else 4 if abs(result) < 100 else 2
++                    precision = 6 if abs(result) < 1 else 4 if abs(result) < 100 else 3
+                     print(f"{unit}: {result:.{precision}g} {unit_name}")
+         
+         print("="*50)
+</pre><h3>Mutant 1201</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -267,7 +267,7 @@
+         
+         for unit, factor in self.conversions[category].items():
+             converted = base_value / factor
+-            if 1 <= abs(converted) < best_value or (best_value < 1 and abs(converted) >= 1):
++            if 1 <= abs(converted) <= best_value or (best_value < 1 and abs(converted) >= 1):
+                 best_unit = unit
+                 best_value = abs(converted)
+         
+</pre><h3>Mutant 1204</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -267,7 +267,7 @@
+         
+         for unit, factor in self.conversions[category].items():
+             converted = base_value / factor
+-            if 1 <= abs(converted) < best_value or (best_value < 1 and abs(converted) >= 1):
++            if 1 <= abs(converted) < best_value or (best_value < 1 and abs(converted) > 1):
+                 best_unit = unit
+                 best_value = abs(converted)
+         
+</pre><h3>Mutant 1205</h3><pre>--- backend/scripts/utilities/unit_converter.py
++++ backend/scripts/utilities/unit_converter.py
+@@ -267,7 +267,7 @@
+         
+         for unit, factor in self.conversions[category].items():
+             converted = base_value / factor
+-            if 1 <= abs(converted) < best_value or (best_value < 1 and abs(converted) >= 1):
++            if 1 <= abs(converted) < best_value or (best_value < 1 and abs(converted) >= 2):
+                 best_unit = unit
+                 best_value = abs(converted)
+         
+</pre></body></html>
