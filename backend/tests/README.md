@@ -9,20 +9,7 @@ All commands assume:
 - A virtual environment activated at the repo root.
 - Working directory is the repo root (`PyEveryday/`), not this folder.
 
-### Install runtime dependencies
-
-The runtime deps for the whole project are pinned in
-[backend/requirements.txt](../requirements.txt):
-
-```bash
-pip install -r backend/requirements.txt
-```
-
-### Install test/dev dependencies
-
-[backend/requirements-dev.txt](../requirements-dev.txt) `-r`-includes the
-runtime file and adds the test toolchain, so this single command covers
-everything needed to run the suite:
+### Install runtime/test dependencies
 
 ```bash
 pip install -r backend/requirements-dev.txt
